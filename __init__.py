@@ -17,13 +17,18 @@ ADDON_NAME = os.path.basename(os.path.dirname(__file__))
 
 addon_keymaps = []
 
-from .cam_control import CI_OT_camera_it
+from .cam_control import (
+    CI_OT_camera_it,
+    CI_OT_camera_it_invoke,
+)
+
+from .right_click import rightclick_cam_control
 
 def register_keymaps():
     kc = bpy.context.window_manager.keyconfigs.addon
     if kc:
         km = kc.keymaps.new(name='3D View', space_type='VIEW_3D')
-        kmi = km.keymap_items.new("view3d.cam_it", type='F5', value='RELEASE')
+        kmi = km.keymap_items.new("view3d.cam_it_invoke", type='F5', value='RELEASE')
         addon_keymaps.append((km, kmi))
 
 def unregister_keymaps():
@@ -33,13 +38,16 @@ def unregister_keymaps():
 
 def register():
     bpy.utils.register_class(CI_OT_camera_it)
+    bpy.utils.register_class(CI_OT_camera_it_invoke)
     register_keymaps()
+    bpy.types.VIEW3D_MT_object_context_menu.append(rightclick_cam_control)
     
 
 
 def unregister():
-
+    bpy.types.VIEW3D_MT_object_context_menu.remove(rightclick_cam_control)
     unregister_keymaps()
+    bpy.utils.unregister_class(CI_OT_camera_it_invoke)
     bpy.utils.unregister_class(CI_OT_camera_it)
     
 

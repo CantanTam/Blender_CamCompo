@@ -3,16 +3,26 @@ from .background import draw_background
 from .icons import draw_icon
 from . import icons
 
-
-class CI_OT_camera_it(bpy.types.Operator):
-    bl_idname = "view3d.cam_it"
+class CI_OT_camera_it_invoke(bpy.types.Operator):
+    bl_idname = "view3d.cam_it_invoke"
     bl_label = "快速设置摄像机"
     bl_description = "快速设置摄像机"
     bl_options = {'REGISTER', 'UNDO'}
 
     @classmethod
     def poll(cls, context):
-        return context.mode == 'OBJECT'
+        return len(bpy.context.selected_objects) > 1 and bpy.context.active_object.type == 'CAMERA' and bpy.context.mode == 'OBJECT'
+
+    def execute(self, context):
+        bpy.ops.view3d.cam_it('INVOKE_DEFAULT')
+        return {'FINISHED'}
+
+
+class CI_OT_camera_it(bpy.types.Operator):
+    bl_idname = "view3d.cam_it"
+    bl_label = "快速设置摄像机"
+    bl_description = "快速设置摄像机"
+    bl_options = {'REGISTER', 'UNDO'}
 
     def invoke(self, context, event):
         
