@@ -2,6 +2,7 @@ import bpy
 from .background import draw_background
 from .icons import draw_icon
 from . import icons
+from . import variables
 
 class CI_OT_camera_it_invoke(bpy.types.Operator):
     bl_idname = "view3d.cam_it_invoke"
@@ -14,6 +15,25 @@ class CI_OT_camera_it_invoke(bpy.types.Operator):
         return len(bpy.context.selected_objects) > 1 and bpy.context.active_object.type == 'CAMERA' and bpy.context.mode == 'OBJECT'
 
     def execute(self, context):
+        variables.camera_object = context.active_object
+
+        for i in bpy.context.selected_objects:
+            variables.target_location = variables.target_location + i.matrix_world.translation
+
+        variables.target_location = variables.target_location - context.active_object.matrix_world.translation
+        variables.target_location = variables.target_location / (len(bpy.context.selected_objects) - 1)
+
+        bpy.ops.object.empty_add(type='SPHERE', radius=1.0, align='WORLD', location=variables.target_location)
+
+        variables.target_object = context.active_object
+        variables.target_object.name = variables.camera_object.name + "_TARGET"
+
+        bpy.ops.mesh.primitive_cube_add(size=2.0, align='WORLD', location=variables.target_location)
+
+        bpy.ops.view3d.camera_to_view_selected()
+
+        bpy.data.objects.remove(bpy.context.active_object, do_unlink=True)
+
         bpy.ops.view3d.cam_it('INVOKE_DEFAULT')
         return {'FINISHED'}
 
@@ -40,10 +60,11 @@ class CI_OT_camera_it(bpy.types.Operator):
         
         
         # 鼠标移动直接 回到 modal
-        if event.type not in {'MOUSEMOVE','NUMPAD_5','ESC'}:
+        if event.type not in {'MOUSEMOVE','NUMPAD_5','ESC','NUMPAD_0'}:
             return {'RUNNING_MODAL'}
         
         elif event.type == 'ESC':
+            bpy.data.objects.remove(variables.target_object, do_unlink=True)
             bpy.types.SpaceView3D.draw_handler_remove(self.handle_backgroud, 'WINDOW')
 
             # 清理残留图片纹理
