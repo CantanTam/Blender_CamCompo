@@ -1,19 +1,20 @@
 import bpy,gpu,os
 from gpu_extras.batch import batch_for_shader
+from . import variables
 
 # 全局控制变量
 camera_statu = None
-num_five = True
+
 
 
 class DrawController:
     def __init__(self,):
-        if num_five :
+        if variables.num_five :
             self.image_path = 'NOTICE_A.png'
         else:
             self.image_path = 'NOTICE_B.png'
         self.handler = None
-        self.needs_redraw = False
+        #self.needs_redraw = False
 
         # 使用固定 notices 文件夹
         if not os.path.isabs(self.image_path):

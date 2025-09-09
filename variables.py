@@ -5,6 +5,20 @@ target_location = Vector((0.0, 0.0, 0.0))
 
 camera_location = Vector((0.0, 0.0, 0.0))
 
-target_object = None
+#cam_target_x = 0
+#cam_target_y = 0
 
+cam_target_distance = 0
+cam_target_distance_factor = 0
+
+target_object = None
+#refer_object = None
 camera_object = None
+
+camera_lens = 0
+camera_distance = 0
+camera_aperture = 0
+
+num_five = True
+num_zero = 0 # 0 → lens；1 → distance； 2 → aperture
+
