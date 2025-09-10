@@ -1,9 +1,16 @@
 import bpy,math
 from mathutils import Vector
 from .background import draw_background
-from .icons import draw_icon
-from . import icons
+from .icons_move_rotate import draw_move_rotate
+from . import icons_move_rotate
+from .icons_lens_dist_aper import draw_lens_dist_aper
+from . import icons_lens_dist_aper
+from .icons_unlock_lock import draw_unlock_lock
+from . import icons_unlock_lock
+
 from . import variables
+
+
 
 class CI_OT_camera_it_invoke(bpy.types.Operator):
     bl_idname = "view3d.cam_it_invoke"
@@ -80,7 +87,9 @@ class CI_OT_camera_it(bpy.types.Operator):
     def invoke(self, context, event):
         
         self.handle_backgroud = bpy.types.SpaceView3D.draw_handler_add(draw_background, (self,context), 'WINDOW', 'POST_PIXEL')
-        draw_icon()
+        draw_move_rotate()
+        draw_lens_dist_aper()
+        draw_unlock_lock()
 
         context.window_manager.modal_handler_add(self)
         return {'RUNNING_MODAL'}
@@ -89,17 +98,23 @@ class CI_OT_camera_it(bpy.types.Operator):
         if event.type =='NUMPAD_5':
             if event.value == 'RELEASE':
                 variables.num_five = not variables.num_five
-            draw_icon()
+            draw_move_rotate()
+            return {'RUNNING_MODAL'}
+        
+        elif event.type =='NUMPAD_PERIOD':
+            if event.value == 'RELEASE':
+                variables.num_period = not variables.num_period
+            draw_unlock_lock()
             return {'RUNNING_MODAL'}
         
         elif event.type == 'NUMPAD_0':
             if event.value == 'RELEASE':
                 variables.num_zero = (variables.num_zero + 1) % 3
-            draw_icon()
+            draw_lens_dist_aper()
             return {'RUNNING_MODAL'}
         
         elif event.type == 'NUMPAD_SLASH':
-            if event.value == 'PRESS':
+            if event.value == 'PRESS' and not event.ctrl and not event.shift and not event.alt:
                 variables.camera_object.location += variables.camera_object.matrix_basis.to_quaternion() @ Vector((0, 0, -1 * variables.cam_target_distance_factor))
             elif event.value == 'RELEASE' and event.ctrl:
                 variables.camera_object.location += variables.camera_object.matrix_basis.to_quaternion() @ Vector((0, 0, -10 * variables.cam_target_distance_factor))
@@ -107,14 +122,14 @@ class CI_OT_camera_it(bpy.types.Operator):
         
 
         elif event.type == 'NUMPAD_ASTERIX':
-            if event.value == 'PRESS':
+            if event.value == 'PRESS' and not event.ctrl and not event.shift and not event.alt:
                 variables.camera_object.location += variables.camera_object.matrix_basis.to_quaternion() @ Vector((0, 0, variables.cam_target_distance_factor))
             elif event.value == 'RELEASE' and event.ctrl:
                 variables.camera_object.location += variables.camera_object.matrix_basis.to_quaternion() @ Vector((0, 0, 10 * variables.cam_target_distance_factor))
             return {'RUNNING_MODAL'}
         
         elif event.type == 'NUMPAD_8':
-            if event.value == 'PRESS':
+            if event.value == 'PRESS' and not event.ctrl and not event.shift and not event.alt:
                 if variables.num_five:
                     variables.camera_object.location += Vector((0, 0, 0.1 * variables.cam_target_distance_factor))
                 else:
@@ -128,7 +143,7 @@ class CI_OT_camera_it(bpy.types.Operator):
         
         
         elif event.type == 'NUMPAD_2':
-            if event.value == 'PRESS':
+            if event.value == 'PRESS' and not event.ctrl and not event.shift and not event.alt:
                 if variables.num_five:
                     variables.camera_object.location += Vector((0, 0, -0.1 * variables.cam_target_distance_factor))
                 else:
@@ -141,233 +156,283 @@ class CI_OT_camera_it(bpy.types.Operator):
             return {'RUNNING_MODAL'}
 
 
-        elif event.type == 'NUMPAD_4':
-            if event.value == 'PRESS':
+        elif event.type == 'NUMPAD_6':
+            if event.value == 'PRESS' and not event.ctrl and not event.shift and not event.alt:
                 variables.target_object.rotation_euler.z += math.radians(1)
             elif event.value == 'RELEASE' and event.ctrl:
                 variables.target_object.rotation_euler.z += math.radians(10)
             return {'RUNNING_MODAL'}
         
-        elif event.type == 'NUMPAD_6':
-            if event.value == 'PRESS':
+        elif event.type == 'NUMPAD_4':
+            if event.value == 'PRESS' and not event.ctrl and not event.shift and not event.alt:
                 variables.target_object.rotation_euler.z += math.radians(-1)
             elif event.value == 'RELEASE' and event.ctrl:
                 variables.target_object.rotation_euler.z += math.radians(-10)
             return {'RUNNING_MODAL'}
         
         elif event.type == 'NUMPAD_7':
-            if event.value == 'PRESS':
+            if event.value == 'PRESS' and not event.ctrl and not event.shift and not event.alt:
                 variables.camera_object.rotation_euler.rotate_axis("Z", math.radians(-1))
             elif event.value == 'RELEASE' and event.ctrl:
                 variables.camera_object.rotation_euler.rotate_axis("Z", math.radians(-10))
             return {'RUNNING_MODAL'}
         
         elif event.type == 'NUMPAD_9':
-            if event.value == 'PRESS':
+            if event.value == 'PRESS' and not event.ctrl and not event.shift and not event.alt:
                 variables.camera_object.rotation_euler.rotate_axis("Z", math.radians(1))
             elif event.value == 'RELEASE' and event.ctrl:
                 variables.camera_object.rotation_euler.rotate_axis("Z", math.radians(10))
             return {'RUNNING_MODAL'}
         
         elif event.type == 'NUMPAD_1':
-            if event.value == 'PRESS':
+            if event.value == 'PRESS' and not event.ctrl and not event.shift and not event.alt:
                 variables.camera_object.location += (variables.camera_object.matrix_basis.to_quaternion() @ Vector((-variables.cam_target_distance_factor, 0, 0)))
             elif event.value == 'RELEASE' and event.ctrl:
                 variables.camera_object.location += (variables.camera_object.matrix_basis.to_quaternion() @ Vector((-5 * variables.cam_target_distance_factor, 0, 0)))
             return {'RUNNING_MODAL'}
         
         elif event.type == 'NUMPAD_3':
-            if event.value == 'PRESS':
+            if event.value == 'PRESS' and not event.ctrl and not event.shift and not event.alt:
                 variables.camera_object.location += (variables.camera_object.matrix_basis.to_quaternion() @ Vector((variables.cam_target_distance_factor, 0, 0)))
             elif event.value == 'RELEASE' and event.ctrl:
                 variables.camera_object.location += (variables.camera_object.matrix_basis.to_quaternion() @ Vector((5 * variables.cam_target_distance_factor, 0, 0)))
             return {'RUNNING_MODAL'}
         
         elif event.type == 'NUMPAD_PLUS':
-            if event.value == 'PRESS':
-                if variables.camera_lens <= 135:
-                    variables.camera_object.data.lens = variables.camera_lens + 1
-                elif variables.camera_lens <= 200:
-                    variables.camera_object.data.lens = variables.camera_lens + 5
-                elif variables.camera_lens < 1200:
-                    variables.camera_object.data.lens = variables.camera_lens + 10
-                elif variables.camera_lens >= 1200:
-                    pass
+            if event.value == 'PRESS' and not event.ctrl and not event.shift and not event.alt:
+                if variables.num_zero == 0:
+                    if variables.camera_lens <= 135:
+                        variables.camera_object.data.lens = variables.camera_lens + 1
+                    elif variables.camera_lens <= 200:
+                        variables.camera_object.data.lens = variables.camera_lens + 5
+                    elif variables.camera_lens < 1200:
+                        variables.camera_object.data.lens = variables.camera_lens + 10
+                    elif variables.camera_lens >= 1200:
+                        pass
 
-                variables.camera_lens = variables.camera_object.data.lens
+                    variables.camera_lens = variables.camera_object.data.lens
+
+                elif variables.num_zero == 1:
+                    variables.camera_object.data.dof.focus_distance = variables.camera_distance + 1
+                    variables.camera_distance = variables.camera_object.data.dof.focus_distance
+
+                elif variables.num_zero == 2:
+                    variables.camera_object.data.dof.aperture_fstop = variables.camera_aperture + 1
+                    variables.camera_aperture = variables.camera_object.data.dof.aperture_fstop
+            
             elif event.value == 'RELEASE' and event.alt:
-                if variables.camera_lens < 1200:
-                    variables.camera_object.data.lens = variables.camera_lens + 1
+                if variables.num_zero == 0:
+                    if variables.camera_lens < 1200:
+                        variables.camera_object.data.lens = variables.camera_lens + 1
 
-                variables.camera_lens = variables.camera_object.data.lens
+                    variables.camera_lens = variables.camera_object.data.lens
+
+                elif variables.num_zero == 1:
+                    variables.camera_object.data.dof.focus_distance = variables.camera_distance + 0.1
+                    variables.camera_distance = variables.camera_object.data.dof.focus_distance
+
+                elif variables.num_zero == 2:
+                    variables.camera_object.data.dof.aperture_fstop = variables.camera_aperture + 0.1
+                    variables.camera_aperture = variables.camera_object.data.dof.aperture_fstop
 
             elif event.value == 'RELEASE' and event.ctrl:
-                if variables.camera_lens < 12:
-                    variables.camera_object.data.lens = variables.camera_lens + 1
-                elif variables.camera_lens < 14:
-                    variables.camera_object.data.lens = 14
-                elif variables.camera_lens < 16:
-                    variables.camera_object.data.lens = 16
-                elif variables.camera_lens < 18:
-                    variables.camera_object.data.lens = 18
-                elif variables.camera_lens < 20:
-                    variables.camera_object.data.lens = 20
-                elif variables.camera_lens < 21:
-                    variables.camera_object.data.lens = 21
-                elif variables.camera_lens < 24:  
-                    variables.camera_object.data.lens = 24
-                elif variables.camera_lens < 28:
-                    variables.camera_object.data.lens = 28
-                elif variables.camera_lens < 30:
-                    variables.camera_object.data.lens = 30
-                elif variables.camera_lens < 35:
-                    variables.camera_object.data.lens = 35
-                elif variables.camera_lens < 40:
-                    variables.camera_object.data.lens = 40
-                elif variables.camera_lens < 45:
-                    variables.camera_object.data.lens = 45
-                elif variables.camera_lens < 50:
-                    variables.camera_object.data.lens = 50
-                elif variables.camera_lens < 55:
-                    variables.camera_object.data.lens = 55
-                elif variables.camera_lens < 58:
-                    variables.camera_object.data.lens = 58
-                elif variables.camera_lens < 70: 
-                    variables.camera_object.data.lens = 70
-                elif variables.camera_lens < 75:
-                    variables.camera_object.data.lens = 75
-                elif variables.camera_lens < 80:
-                    variables.camera_object.data.lens = 80
-                elif variables.camera_lens < 85:
-                    variables.camera_object.data.lens = 85
-                elif variables.camera_lens < 90:
-                    variables.camera_object.data.lens = 90
-                elif variables.camera_lens < 100:
-                    variables.camera_object.data.lens = 100
-                elif variables.camera_lens < 105:
-                    variables.camera_object.data.lens = 105
-                elif variables.camera_lens < 135:
-                    variables.camera_object.data.lens = 135
-                elif variables.camera_lens < 150:  # 添加了150mm
-                    variables.camera_object.data.lens = 150
-                elif variables.camera_lens < 180:
-                    variables.camera_object.data.lens = 180
-                elif variables.camera_lens < 200:
-                    variables.camera_object.data.lens = 200
-                elif variables.camera_lens < 300:
-                    variables.camera_object.data.lens = 300
-                elif variables.camera_lens < 400:
-                    variables.camera_object.data.lens = 400
-                elif variables.camera_lens < 500:
-                    variables.camera_object.data.lens = 500
-                elif variables.camera_lens < 600:
-                    variables.camera_object.data.lens = 600
-                elif variables.camera_lens < 800:
-                    variables.camera_object.data.lens = 800
-                elif variables.camera_lens < 1200:
-                    variables.camera_object.data.lens = 1200
-                
-                variables.camera_lens = variables.camera_object.data.lens
+                if variables.num_zero == 0:
+                    if variables.camera_lens < 12:
+                        variables.camera_object.data.lens = variables.camera_lens + 1
+                    elif variables.camera_lens < 14:
+                        variables.camera_object.data.lens = 14
+                    elif variables.camera_lens < 16:
+                        variables.camera_object.data.lens = 16
+                    elif variables.camera_lens < 18:
+                        variables.camera_object.data.lens = 18
+                    elif variables.camera_lens < 20:
+                        variables.camera_object.data.lens = 20
+                    elif variables.camera_lens < 21:
+                        variables.camera_object.data.lens = 21
+                    elif variables.camera_lens < 24:  
+                        variables.camera_object.data.lens = 24
+                    elif variables.camera_lens < 28:
+                        variables.camera_object.data.lens = 28
+                    elif variables.camera_lens < 30:
+                        variables.camera_object.data.lens = 30
+                    elif variables.camera_lens < 35:
+                        variables.camera_object.data.lens = 35
+                    elif variables.camera_lens < 40:
+                        variables.camera_object.data.lens = 40
+                    elif variables.camera_lens < 45:
+                        variables.camera_object.data.lens = 45
+                    elif variables.camera_lens < 50:
+                        variables.camera_object.data.lens = 50
+                    elif variables.camera_lens < 55:
+                        variables.camera_object.data.lens = 55
+                    elif variables.camera_lens < 58:
+                        variables.camera_object.data.lens = 58
+                    elif variables.camera_lens < 70: 
+                        variables.camera_object.data.lens = 70
+                    elif variables.camera_lens < 75:
+                        variables.camera_object.data.lens = 75
+                    elif variables.camera_lens < 80:
+                        variables.camera_object.data.lens = 80
+                    elif variables.camera_lens < 85:
+                        variables.camera_object.data.lens = 85
+                    elif variables.camera_lens < 90:
+                        variables.camera_object.data.lens = 90
+                    elif variables.camera_lens < 100:
+                        variables.camera_object.data.lens = 100
+                    elif variables.camera_lens < 105:
+                        variables.camera_object.data.lens = 105
+                    elif variables.camera_lens < 135:
+                        variables.camera_object.data.lens = 135
+                    elif variables.camera_lens < 150:  # 添加了150mm
+                        variables.camera_object.data.lens = 150
+                    elif variables.camera_lens < 180:
+                        variables.camera_object.data.lens = 180
+                    elif variables.camera_lens < 200:
+                        variables.camera_object.data.lens = 200
+                    elif variables.camera_lens < 300:
+                        variables.camera_object.data.lens = 300
+                    elif variables.camera_lens < 400:
+                        variables.camera_object.data.lens = 400
+                    elif variables.camera_lens < 500:
+                        variables.camera_object.data.lens = 500
+                    elif variables.camera_lens < 600:
+                        variables.camera_object.data.lens = 600
+                    elif variables.camera_lens < 800:
+                        variables.camera_object.data.lens = 800
+                    elif variables.camera_lens < 1200:
+                        variables.camera_object.data.lens = 1200
+                    
+                    variables.camera_lens = variables.camera_object.data.lens
+
+                elif variables.num_zero == 1:
+                    variables.camera_object.data.dof.focus_distance = variables.camera_distance + 10
+                    variables.camera_distance = variables.camera_object.data.dof.focus_distance
+
+                elif variables.num_zero == 2:
+                    variables.camera_object.data.dof.aperture_fstop = variables.camera_aperture + 5
+                    variables.camera_aperture = variables.camera_object.data.dof.aperture_fstop
 
             return {'RUNNING_MODAL'}
         
         elif event.type == 'NUMPAD_MINUS':
-            if event.value == 'PRESS':
-                # 按常规逻辑递减
-                if variables.camera_lens > 200 and variables.camera_lens <= 1200:
-                    variables.camera_object.data.lens = variables.camera_lens - 10
-                elif variables.camera_lens > 135 and variables.camera_lens <= 200:
-                    variables.camera_object.data.lens = variables.camera_lens - 5
-                elif variables.camera_lens > 0 and variables.camera_lens <= 135:
-                    variables.camera_object.data.lens = variables.camera_lens - 1
-                # lens <= 0 不做处理
-                variables.camera_lens = variables.camera_object.data.lens
-
-            elif event.value == 'RELEASE' and event.alt:
-                # RELEASE + Alt 时递减 1
-                if variables.camera_lens > 0:
-                    variables.camera_object.data.lens = variables.camera_lens - 1
+            if event.value == 'PRESS' and not event.ctrl and not event.shift and not event.alt:
+                if variables.num_zero == 0:
+                    if variables.camera_lens > 200 and variables.camera_lens <= 1200:
+                        variables.camera_object.data.lens = variables.camera_lens - 10
+                    elif variables.camera_lens > 135 and variables.camera_lens <= 200:
+                        variables.camera_object.data.lens = variables.camera_lens - 5
+                    elif variables.camera_lens > 0 and variables.camera_lens <= 135:
+                        variables.camera_object.data.lens = variables.camera_lens - 1
+                    # lens <= 0 不做处理
                     variables.camera_lens = variables.camera_object.data.lens
 
-            elif event.value == 'RELEASE' and event.ctrl:
-                # 按常用焦段递减
-                if variables.camera_lens > 1200:
-                    variables.camera_object.data.lens = 1200
-                elif variables.camera_lens > 800:
-                    variables.camera_object.data.lens = 800
-                elif variables.camera_lens > 600:
-                    variables.camera_object.data.lens = 600
-                elif variables.camera_lens > 500:
-                    variables.camera_object.data.lens = 500
-                elif variables.camera_lens > 400:
-                    variables.camera_object.data.lens = 400
-                elif variables.camera_lens > 300:
-                    variables.camera_object.data.lens = 300
-                elif variables.camera_lens > 200:
-                    variables.camera_object.data.lens = 200
-                elif variables.camera_lens > 180:
-                    variables.camera_object.data.lens = 180
-                elif variables.camera_lens > 150:
-                    variables.camera_object.data.lens = 150
-                elif variables.camera_lens > 135:
-                    variables.camera_object.data.lens = 135
-                elif variables.camera_lens > 105:
-                    variables.camera_object.data.lens = 105
-                elif variables.camera_lens > 100:
-                    variables.camera_object.data.lens = 100
-                elif variables.camera_lens > 90:
-                    variables.camera_object.data.lens = 90
-                elif variables.camera_lens > 85:
-                    variables.camera_object.data.lens = 85
-                elif variables.camera_lens > 80:
-                    variables.camera_object.data.lens = 80
-                elif variables.camera_lens > 75:
-                    variables.camera_object.data.lens = 75
-                elif variables.camera_lens > 70:
-                    variables.camera_object.data.lens = 70
-                elif variables.camera_lens > 58:
-                    variables.camera_object.data.lens = 58
-                elif variables.camera_lens > 55:
-                    variables.camera_object.data.lens = 55
-                elif variables.camera_lens > 50:
-                    variables.camera_object.data.lens = 50
-                elif variables.camera_lens > 45:
-                    variables.camera_object.data.lens = 45
-                elif variables.camera_lens > 40:
-                    variables.camera_object.data.lens = 40
-                elif variables.camera_lens > 35:
-                    variables.camera_object.data.lens = 35
-                elif variables.camera_lens > 30:
-                    variables.camera_object.data.lens = 30
-                elif variables.camera_lens > 28:
-                    variables.camera_object.data.lens = 28
-                elif variables.camera_lens > 24:
-                    variables.camera_object.data.lens = 24
-                elif variables.camera_lens > 21:
-                    variables.camera_object.data.lens = 21
-                elif variables.camera_lens > 20:
-                    variables.camera_object.data.lens = 20
-                elif variables.camera_lens > 18:
-                    variables.camera_object.data.lens = 18
-                elif variables.camera_lens > 16:
-                    variables.camera_object.data.lens = 16
-                elif variables.camera_lens > 14:
-                    variables.camera_object.data.lens = 14
-                elif variables.camera_lens > 12:
-                    variables.camera_object.data.lens = 12
-                elif variables.camera_lens > 1:
-                    variables.camera_object.data.lens = variables.camera_lens - 1
+                elif variables.num_zero == 1:
+                    variables.camera_object.data.dof.focus_distance = variables.camera_distance - 1
+                    variables.camera_distance = variables.camera_object.data.dof.focus_distance
 
-                variables.camera_lens = variables.camera_object.data.lens
+                elif variables.num_zero == 2:
+                    variables.camera_object.data.dof.aperture_fstop = variables.camera_aperture - 1
+                    variables.camera_aperture = variables.camera_object.data.dof.aperture_fstop
+
+            elif event.value == 'RELEASE' and event.alt:
+                if variables.num_zero == 0:
+                    if variables.camera_lens > 0:
+                        variables.camera_object.data.lens = variables.camera_lens - 1
+                        variables.camera_lens = variables.camera_object.data.lens
+
+                elif variables.num_zero == 1:
+                    variables.camera_object.data.dof.focus_distance = variables.camera_distance - 0.1
+                    variables.camera_distance = variables.camera_object.data.dof.focus_distance
+
+                elif variables.num_zero == 2:
+                    variables.camera_object.data.dof.aperture_fstop = variables.camera_aperture - 0.1
+                    variables.camera_aperture = variables.camera_object.data.dof.aperture_fstop
+
+            elif event.value == 'RELEASE' and event.ctrl:
+                if variables.num_five == 0:
+                    if variables.camera_lens > 1200:
+                        variables.camera_object.data.lens = 1200
+                    elif variables.camera_lens > 800:
+                        variables.camera_object.data.lens = 800
+                    elif variables.camera_lens > 600:
+                        variables.camera_object.data.lens = 600
+                    elif variables.camera_lens > 500:
+                        variables.camera_object.data.lens = 500
+                    elif variables.camera_lens > 400:
+                        variables.camera_object.data.lens = 400
+                    elif variables.camera_lens > 300:
+                        variables.camera_object.data.lens = 300
+                    elif variables.camera_lens > 200:
+                        variables.camera_object.data.lens = 200
+                    elif variables.camera_lens > 180:
+                        variables.camera_object.data.lens = 180
+                    elif variables.camera_lens > 150:
+                        variables.camera_object.data.lens = 150
+                    elif variables.camera_lens > 135:
+                        variables.camera_object.data.lens = 135
+                    elif variables.camera_lens > 105:
+                        variables.camera_object.data.lens = 105
+                    elif variables.camera_lens > 100:
+                        variables.camera_object.data.lens = 100
+                    elif variables.camera_lens > 90:
+                        variables.camera_object.data.lens = 90
+                    elif variables.camera_lens > 85:
+                        variables.camera_object.data.lens = 85
+                    elif variables.camera_lens > 80:
+                        variables.camera_object.data.lens = 80
+                    elif variables.camera_lens > 75:
+                        variables.camera_object.data.lens = 75
+                    elif variables.camera_lens > 70:
+                        variables.camera_object.data.lens = 70
+                    elif variables.camera_lens > 58:
+                        variables.camera_object.data.lens = 58
+                    elif variables.camera_lens > 55:
+                        variables.camera_object.data.lens = 55
+                    elif variables.camera_lens > 50:
+                        variables.camera_object.data.lens = 50
+                    elif variables.camera_lens > 45:
+                        variables.camera_object.data.lens = 45
+                    elif variables.camera_lens > 40:
+                        variables.camera_object.data.lens = 40
+                    elif variables.camera_lens > 35:
+                        variables.camera_object.data.lens = 35
+                    elif variables.camera_lens > 30:
+                        variables.camera_object.data.lens = 30
+                    elif variables.camera_lens > 28:
+                        variables.camera_object.data.lens = 28
+                    elif variables.camera_lens > 24:
+                        variables.camera_object.data.lens = 24
+                    elif variables.camera_lens > 21:
+                        variables.camera_object.data.lens = 21
+                    elif variables.camera_lens > 20:
+                        variables.camera_object.data.lens = 20
+                    elif variables.camera_lens > 18:
+                        variables.camera_object.data.lens = 18
+                    elif variables.camera_lens > 16:
+                        variables.camera_object.data.lens = 16
+                    elif variables.camera_lens > 14:
+                        variables.camera_object.data.lens = 14
+                    elif variables.camera_lens > 12:
+                        variables.camera_object.data.lens = 12
+                    elif variables.camera_lens > 1:
+                        variables.camera_object.data.lens = variables.camera_lens - 1
+
+                    variables.camera_lens = variables.camera_object.data.lens
+
+                elif variables.num_zero == 1:
+                    variables.camera_object.data.dof.focus_distance = variables.camera_distance - 10
+                    variables.camera_distance = variables.camera_object.data.dof.focus_distance
+
+                elif variables.num_zero == 2:
+                    variables.camera_object.data.dof.aperture_fstop = variables.camera_aperture - 5
+                    variables.camera_aperture = variables.camera_object.data.dof.aperture_fstop
 
             return {'RUNNING_MODAL'}
-
-
         
         # 鼠标移动直接 回到 modal
-        elif event.type not in {'MOUSEMOVE','NUMPAD_5','ESC','NUMPAD_0'}:
+        elif event.type not in {'MOUSEMOVE','NUMPAD_5','ESC','NUMPAD_0','WHEELUPMOUSE','WHEELDOWNMOUSE','HOME'}:
             return {'RUNNING_MODAL'}
-        
+                
         elif event.type == 'ESC':
             #bpy.data.objects.remove(variables.target_object, do_unlink=True)
             bpy.types.SpaceView3D.draw_handler_remove(self.handle_backgroud, 'WINDOW')
@@ -385,9 +450,17 @@ class CI_OT_camera_it(bpy.types.Operator):
 
 
             # 清理残留图片纹理
-            if icons.camera_statu:
-                icons.camera_statu.cleanup()
-                icons.camera_statu = None
+            if icons_move_rotate.move_rotate_statu:
+                icons_move_rotate.move_rotate_statu.cleanup()
+                icons_move_rotate.move_rotate_statu = None
+
+            if icons_lens_dist_aper.lens_dist_aper_statu:
+                icons_lens_dist_aper.lens_dist_aper_statu.cleanup()
+                icons_lens_dist_aper.lens_dist_aper_statu = None
+
+            if icons_unlock_lock.unlock_lock_statu:
+                icons_unlock_lock.unlock_lock_statu.cleanup()
+                icons_unlock_lock.unlock_lock_statu = None
 
 
             return {'FINISHED'}

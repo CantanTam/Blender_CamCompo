@@ -20,5 +20,6 @@ camera_distance = 0
 camera_aperture = 0
 
 num_five = True
+num_period = False
 num_zero = 0 # 0 → lens；1 → distance； 2 → aperture
 

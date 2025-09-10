@@ -3,16 +3,16 @@ from gpu_extras.batch import batch_for_shader
 from . import variables
 
 # 全局控制变量
-camera_statu = None
+unlock_lock_statu = None
 
 
 
-class DrawController:
+class DrawUnlockLock:
     def __init__(self,):
-        if variables.num_five :
-            self.image_path = 'NOTICE_A.png'
+        if variables.num_period :
+            self.image_path = 'ICON_LOCK.png'
         else:
-            self.image_path = 'NOTICE_B.png'
+            self.image_path = 'ICON_UNLOCK.png'
         self.handler = None
         #self.needs_redraw = False
 
@@ -34,10 +34,10 @@ class DrawController:
 
         self.vertices = {
             "pos": [
-                ((bpy.context.region.width - 550) * 0.5, 0),
-                ((bpy.context.region.width + 550) * 0.5, 0),
-                ((bpy.context.region.width + 550) * 0.5, 70),
-                ((bpy.context.region.width - 550) * 0.5, 70)
+                ((bpy.context.region.width - 595) * 0.5, 0),
+                ((bpy.context.region.width + 595) * 0.5, 0),
+                ((bpy.context.region.width + 595) * 0.5, 85),
+                ((bpy.context.region.width - 595) * 0.5, 85)
             ],
             "texCoord": [(0, 0), (1, 0), (1, 1), (0, 1)],
         }
@@ -68,13 +68,13 @@ class DrawController:
 
 
 
-def draw_icon():
-    global camera_statu
-    if camera_statu:
-        camera_statu.cleanup()
-        camera_statu = None
+def draw_unlock_lock():
+    global unlock_lock_statu
+    if unlock_lock_statu:
+        unlock_lock_statu.cleanup()
+        unlock_lock_statu = None
     
-    camera_statu = DrawController()
-    return camera_statu
+    unlock_lock_statu = DrawUnlockLock()
+    return unlock_lock_statu
 
 
