@@ -9,10 +9,15 @@ move_rotate_statu = None
 
 class DrawMoveRotate:
     def __init__(self,):
-        if variables.num_five :
-            self.image_path = 'ICON_MOVE.png'
+        if not variables.single_camera:
+            if variables.num_five :
+                self.image_path = 'ICON_MOVE.png'
+            else:
+                self.image_path = 'ICON_ROTATE.png'
+        
         else:
-            self.image_path = 'ICON_ROTATE.png'
+            self.image_path = 'ICON_MOVE_SINGLE.png'
+        
         self.handler = None
         #self.needs_redraw = False
 

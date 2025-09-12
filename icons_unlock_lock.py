@@ -9,10 +9,15 @@ unlock_lock_statu = None
 
 class DrawUnlockLock:
     def __init__(self,):
-        if variables.num_period :
-            self.image_path = 'ICON_LOCK.png'
+        if not variables.single_camera:
+            if variables.num_period :
+                self.image_path = 'ICON_LOCK.png'
+            else:
+                self.image_path = 'ICON_UNLOCK.png'
+
         else:
-            self.image_path = 'ICON_UNLOCK.png'
+            self.image_path = 'ICON_UNLOCK_SINGLE.png'
+        
         self.handler = None
         #self.needs_redraw = False
 

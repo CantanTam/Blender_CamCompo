@@ -17,7 +17,7 @@ ADDON_NAME = os.path.basename(os.path.dirname(__file__))
 
 addon_keymaps = []
 
-from .cam_control import (
+from .cam_compo import (
     CI_OT_camera_it,
     CI_OT_camera_it_invoke,
 )
@@ -28,7 +28,7 @@ def register_keymaps():
     kc = bpy.context.window_manager.keyconfigs.addon
     if kc:
         km = kc.keymaps.new(name='3D View', space_type='VIEW_3D')
-        kmi = km.keymap_items.new("view3d.cam_it_invoke", type='F6', value='RELEASE')
+        kmi = km.keymap_items.new("view3d.cam_compo_invoke", type='F6', value='RELEASE')
         addon_keymaps.append((km, kmi))
 
 def unregister_keymaps():

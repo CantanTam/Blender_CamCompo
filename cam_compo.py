@@ -16,14 +16,14 @@ from . import variables
 
 
 class CI_OT_camera_it_invoke(bpy.types.Operator):
-    bl_idname = "view3d.cam_it_invoke"
+    bl_idname = "view3d.cam_compo_invoke"
     bl_label = "快速设置摄像机"
     bl_description = "快速设置摄像机"
     bl_options = {'REGISTER', 'UNDO'}
 
     @classmethod
     def poll(cls, context):
-        return len(bpy.context.selected_objects) > 1 and bpy.context.active_object.type == 'CAMERA' and bpy.context.mode == 'OBJECT'
+        return bpy.context.active_object.type == 'CAMERA' and bpy.context.mode == 'OBJECT'
 
     def execute(self, context):
         variables.camera_object = context.active_object
@@ -35,43 +35,51 @@ class CI_OT_camera_it_invoke(bpy.types.Operator):
 
         bpy.context.scene.camera = context.active_object
 
-        for i in bpy.context.selected_objects:
-            variables.target_location = variables.target_location + i.matrix_world.translation
+        if len(context.selected_objects) == 1:
+            variables.single_camera = True
+        else:
+            variables.single_camera = False
 
-        variables.target_location = variables.target_location - bpy.context.active_object.matrix_world.translation
-        variables.target_location = variables.target_location / (len(bpy.context.selected_objects) - 1)
+        if not variables.single_camera:
 
-        bpy.ops.object.empty_add(type='SPHERE', radius=1.0, align='WORLD', location=variables.target_location)
+            for i in bpy.context.selected_objects:
+                variables.target_location = variables.target_location + i.matrix_world.translation
 
-        variables.target_object = context.active_object
-        variables.target_object.name = variables.camera_object.name + "_TARGET"
+            variables.target_location = variables.target_location - bpy.context.active_object.matrix_world.translation
+            variables.target_location = variables.target_location / (len(bpy.context.selected_objects) - 1)
 
-        bpy.ops.mesh.primitive_cube_add(size=2.0, align='WORLD', location=variables.target_location)
+            bpy.ops.object.empty_add(type='SPHERE', radius=1.0, align='WORLD', location=variables.target_location)
 
-        #需要完全新建完mesh之后才能对准
-        bpy.app.timers.register(lambda: (bpy.ops.view3d.camera_to_view_selected('INVOKE_DEFAULT'), None)[1], first_interval=0.01)
+            variables.target_object = context.active_object
+            variables.target_object.name = variables.camera_object.name + "_TARGET"
 
-        bpy.app.timers.register(lambda: (bpy.data.objects.remove(bpy.context.active_object, do_unlink=True), None)[1], first_interval=0.01)
+            bpy.ops.mesh.primitive_cube_add(size=2.0, align='WORLD', location=variables.target_location)
 
-        variables.camera_object.rotation_euler[0] = math.radians(90)
-        variables.camera_object.rotation_euler[1] = math.radians(0)
-        variables.camera_object.rotation_euler[2] = math.radians(0)
+            #需要完全新建完mesh之后才能对准
+            bpy.app.timers.register(lambda: (bpy.ops.view3d.camera_to_view_selected('INVOKE_DEFAULT'), None)[1], first_interval=0.01)
 
-        variables.cam_target_distance = round((variables.camera_object.location - variables.target_object.location).length, 3)
+            bpy.app.timers.register(lambda: (bpy.data.objects.remove(bpy.context.active_object, do_unlink=True), None)[1], first_interval=0.01)
 
-        variables.cam_target_distance_factor = variables.cam_target_distance * 0.01
+            variables.camera_object.rotation_euler[0] = math.radians(90)
+            variables.camera_object.rotation_euler[1] = math.radians(0)
+            variables.camera_object.rotation_euler[2] = math.radians(0)
 
-        variables.camera_object.parent = variables.target_object
+            variables.cam_target_distance = round((variables.camera_object.location - variables.target_object.location).length, 3)
 
-        #最后去除注释
-        bpy.ops.view3d.view_camera('INVOKE_DEFAULT')
+            variables.cam_target_distance_factor = variables.cam_target_distance * 0.01
 
-        bpy.ops.view3d.cam_it('INVOKE_DEFAULT')
+            variables.camera_object.parent = variables.target_object
+
+            #最后去除注释
+            bpy.ops.view3d.view_camera('INVOKE_DEFAULT')
+
+            bpy.ops.view3d.cam_compo_multi('INVOKE_DEFAULT')
+        
         return {'FINISHED'}
 
 
 class CI_OT_camera_it(bpy.types.Operator):
-    bl_idname = "view3d.cam_it"
+    bl_idname = "view3d.cam_compo_multi"
     bl_label = "快速设置摄像机"
     bl_description = "快速设置摄像机"
     bl_options = {'REGISTER', 'UNDO'}
@@ -234,69 +242,20 @@ class CI_OT_camera_it(bpy.types.Operator):
                 if variables.num_zero == 0:
                     if variables.camera_lens < 12:
                         variables.camera_object.data.lens = variables.camera_lens + 1
-                    elif variables.camera_lens < 14:
-                        variables.camera_object.data.lens = 14
-                    elif variables.camera_lens < 16:
-                        variables.camera_object.data.lens = 16
-                    elif variables.camera_lens < 18:
-                        variables.camera_object.data.lens = 18
-                    elif variables.camera_lens < 20:
-                        variables.camera_object.data.lens = 20
-                    elif variables.camera_lens < 21:
-                        variables.camera_object.data.lens = 21
-                    elif variables.camera_lens < 24:  
-                        variables.camera_object.data.lens = 24
-                    elif variables.camera_lens < 28:
-                        variables.camera_object.data.lens = 28
-                    elif variables.camera_lens < 30:
-                        variables.camera_object.data.lens = 30
-                    elif variables.camera_lens < 35:
-                        variables.camera_object.data.lens = 35
-                    elif variables.camera_lens < 40:
-                        variables.camera_object.data.lens = 40
-                    elif variables.camera_lens < 45:
-                        variables.camera_object.data.lens = 45
-                    elif variables.camera_lens < 50:
-                        variables.camera_object.data.lens = 50
-                    elif variables.camera_lens < 55:
-                        variables.camera_object.data.lens = 55
-                    elif variables.camera_lens < 58:
-                        variables.camera_object.data.lens = 58
-                    elif variables.camera_lens < 70: 
-                        variables.camera_object.data.lens = 70
-                    elif variables.camera_lens < 75:
-                        variables.camera_object.data.lens = 75
-                    elif variables.camera_lens < 80:
-                        variables.camera_object.data.lens = 80
-                    elif variables.camera_lens < 85:
-                        variables.camera_object.data.lens = 85
-                    elif variables.camera_lens < 90:
-                        variables.camera_object.data.lens = 90
-                    elif variables.camera_lens < 100:
-                        variables.camera_object.data.lens = 100
-                    elif variables.camera_lens < 105:
-                        variables.camera_object.data.lens = 105
-                    elif variables.camera_lens < 135:
-                        variables.camera_object.data.lens = 135
-                    elif variables.camera_lens < 150:  # 添加了150mm
-                        variables.camera_object.data.lens = 150
-                    elif variables.camera_lens < 180:
-                        variables.camera_object.data.lens = 180
-                    elif variables.camera_lens < 200:
-                        variables.camera_object.data.lens = 200
-                    elif variables.camera_lens < 300:
-                        variables.camera_object.data.lens = 300
-                    elif variables.camera_lens < 400:
-                        variables.camera_object.data.lens = 400
-                    elif variables.camera_lens < 500:
-                        variables.camera_object.data.lens = 500
-                    elif variables.camera_lens < 600:
-                        variables.camera_object.data.lens = 600
-                    elif variables.camera_lens < 800:
-                        variables.camera_object.data.lens = 800
-                    elif variables.camera_lens < 1200:
-                        variables.camera_object.data.lens = 1200
-                    
+                    else:
+                        lens_steps = [
+                            12, 14, 16, 18, 20, 21, 24, 28, 30, 35,
+                            40, 45, 50, 55, 58, 70, 75, 80, 85, 90,
+                            100, 105, 135, 150, 180, 200, 300, 400,
+                            500, 600, 800, 1200
+                        ]
+                        # 找到大于当前焦距的第一个档位
+                        for lens in lens_steps:
+                            if variables.camera_lens < lens:
+                                variables.camera_object.data.lens = lens
+                                break
+
+                    # 更新变量
                     variables.camera_lens = variables.camera_object.data.lens
 
                 elif variables.num_zero == 1:
@@ -346,74 +305,26 @@ class CI_OT_camera_it(bpy.types.Operator):
 
             elif event.value == 'RELEASE' and event.ctrl:
                 if variables.num_zero == 0:
-                    if variables.camera_lens > 1200:
-                        variables.camera_object.data.lens = 1200
-                    elif variables.camera_lens > 800:
-                        variables.camera_object.data.lens = 800
-                    elif variables.camera_lens > 600:
-                        variables.camera_object.data.lens = 600
-                    elif variables.camera_lens > 500:
-                        variables.camera_object.data.lens = 500
-                    elif variables.camera_lens > 400:
-                        variables.camera_object.data.lens = 400
-                    elif variables.camera_lens > 300:
-                        variables.camera_object.data.lens = 300
-                    elif variables.camera_lens > 200:
-                        variables.camera_object.data.lens = 200
-                    elif variables.camera_lens > 180:
-                        variables.camera_object.data.lens = 180
-                    elif variables.camera_lens > 150:
-                        variables.camera_object.data.lens = 150
-                    elif variables.camera_lens > 135:
-                        variables.camera_object.data.lens = 135
-                    elif variables.camera_lens > 105:
-                        variables.camera_object.data.lens = 105
-                    elif variables.camera_lens > 100:
-                        variables.camera_object.data.lens = 100
-                    elif variables.camera_lens > 90:
-                        variables.camera_object.data.lens = 90
-                    elif variables.camera_lens > 85:
-                        variables.camera_object.data.lens = 85
-                    elif variables.camera_lens > 80:
-                        variables.camera_object.data.lens = 80
-                    elif variables.camera_lens > 75:
-                        variables.camera_object.data.lens = 75
-                    elif variables.camera_lens > 70:
-                        variables.camera_object.data.lens = 70
-                    elif variables.camera_lens > 58:
-                        variables.camera_object.data.lens = 58
-                    elif variables.camera_lens > 55:
-                        variables.camera_object.data.lens = 55
-                    elif variables.camera_lens > 50:
-                        variables.camera_object.data.lens = 50
-                    elif variables.camera_lens > 45:
-                        variables.camera_object.data.lens = 45
-                    elif variables.camera_lens > 40:
-                        variables.camera_object.data.lens = 40
-                    elif variables.camera_lens > 35:
-                        variables.camera_object.data.lens = 35
-                    elif variables.camera_lens > 30:
-                        variables.camera_object.data.lens = 30
-                    elif variables.camera_lens > 28:
-                        variables.camera_object.data.lens = 28
-                    elif variables.camera_lens > 24:
-                        variables.camera_object.data.lens = 24
-                    elif variables.camera_lens > 21:
-                        variables.camera_object.data.lens = 21
-                    elif variables.camera_lens > 20:
-                        variables.camera_object.data.lens = 20
-                    elif variables.camera_lens > 18:
-                        variables.camera_object.data.lens = 18
-                    elif variables.camera_lens > 16:
-                        variables.camera_object.data.lens = 16
-                    elif variables.camera_lens > 14:
-                        variables.camera_object.data.lens = 14
-                    elif variables.camera_lens > 12:
-                        variables.camera_object.data.lens = 12
-                    elif variables.camera_lens > 1:
-                        variables.camera_object.data.lens = variables.camera_lens - 1
-                        
+                    if variables.camera_lens <= 12:
+                        variables.camera_object.data.lens = max(1, variables.camera_lens - 1)
+                    else:
+                        # 焦距档位列表，按升序排列
+                        lens_steps = [
+                            12, 14, 16, 18, 20, 21, 24, 28, 30, 35,
+                            40, 45, 50, 55, 58, 70, 75, 80, 85, 90,
+                            100, 105, 135, 150, 180, 200, 300, 400,
+                            500, 600, 800, 1200
+                        ]
+                        # 从大到小找第一个小于当前焦距的档位
+                        for lens in reversed(lens_steps):
+                            if variables.camera_lens > lens:
+                                variables.camera_object.data.lens = lens
+                                break
+                        else:
+                            # 如果小于最小档位，直接减1
+                            variables.camera_object.data.lens = variables.camera_lens - 1
 
+                    # 更新变量
                     variables.camera_lens = variables.camera_object.data.lens
 
                 elif variables.num_zero == 1:

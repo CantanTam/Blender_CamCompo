@@ -1,6 +1,8 @@
 import bpy
 from mathutils import Vector
 
+single_camera = True
+
 target_location = Vector((0.0, 0.0, 0.0))
 
 camera_location = Vector((0.0, 0.0, 0.0))
