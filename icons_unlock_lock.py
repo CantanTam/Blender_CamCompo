@@ -32,6 +32,13 @@ class DrawUnlockLock:
         else:
             self.shader = gpu.shader.from_builtin('IMAGE')
 
+
+        #self.batch = batch_for_shader(self.shader, 'TRI_FAN', self.vertices)
+
+        self.handler = bpy.types.SpaceView3D.draw_handler_add(self.draw, (), 'WINDOW', 'POST_PIXEL')
+
+
+    def draw(self):
         self.vertices = {
             "pos": [
                 ((bpy.context.region.width - 595) * 0.5, 0),
@@ -41,12 +48,6 @@ class DrawUnlockLock:
             ],
             "texCoord": [(0, 0), (1, 0), (1, 1), (0, 1)],
         }
-        self.batch = batch_for_shader(self.shader, 'TRI_FAN', self.vertices)
-
-        self.handler = bpy.types.SpaceView3D.draw_handler_add(self.draw, (), 'WINDOW', 'POST_PIXEL')
-
-
-    def draw(self):
         self.batch = batch_for_shader(self.shader, 'TRI_FAN', self.vertices)
         gpu.state.blend_set('ALPHA')
         self.shader.bind()

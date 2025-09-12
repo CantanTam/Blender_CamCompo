@@ -8,6 +8,9 @@ from . import icons_lens_dist_aper
 from .icons_unlock_lock import draw_unlock_lock
 from . import icons_unlock_lock
 
+from .camera_info import draw_camera_info
+from . import camera_info
+
 from . import variables
 
 
@@ -45,28 +48,17 @@ class CI_OT_camera_it_invoke(bpy.types.Operator):
 
         bpy.ops.mesh.primitive_cube_add(size=2.0, align='WORLD', location=variables.target_location)
 
-        #variables.refer_object = context.active_object
-
         #需要完全新建完mesh之后才能对准
         bpy.app.timers.register(lambda: (bpy.ops.view3d.camera_to_view_selected('INVOKE_DEFAULT'), None)[1], first_interval=0.01)
 
         bpy.app.timers.register(lambda: (bpy.data.objects.remove(bpy.context.active_object, do_unlink=True), None)[1], first_interval=0.01)
 
-        #bpy.ops.object.select_all(action='DESELECT')
-        #variables.camera_object.select_set(True)
-        #bpy.context.view_layer.objects.active = variables.camera_object
-
         variables.camera_object.rotation_euler[0] = math.radians(90)
         variables.camera_object.rotation_euler[1] = math.radians(0)
-        variables.camera_object.rotation_euler[2] = math.radians(90)
+        variables.camera_object.rotation_euler[2] = math.radians(0)
 
-        move_z = variables.target_object.matrix_world.translation.z - variables.camera_object.matrix_world.translation.z
-        variables.camera_object.location.z += move_z
+        variables.cam_target_distance = round((variables.camera_object.location - variables.target_object.location).length, 3)
 
-        cam_target_x = variables.camera_object.matrix_world.translation.x - variables.target_object.matrix_world.translation.x
-        cam_target_y = variables.camera_object.matrix_world.translation.y - variables.target_object.matrix_world.translation.y
-
-        variables.cam_target_distance = round(math.hypot(cam_target_x, cam_target_y), 3)
         variables.cam_target_distance_factor = variables.cam_target_distance * 0.01
 
         variables.camera_object.parent = variables.target_object
@@ -90,6 +82,9 @@ class CI_OT_camera_it(bpy.types.Operator):
         draw_move_rotate()
         draw_lens_dist_aper()
         draw_unlock_lock()
+
+        #测试成功后删除注释
+        draw_camera_info()
 
         context.window_manager.modal_handler_add(self)
         return {'RUNNING_MODAL'}
@@ -160,28 +155,28 @@ class CI_OT_camera_it(bpy.types.Operator):
             if event.value == 'PRESS' and not event.ctrl and not event.shift and not event.alt:
                 variables.target_object.rotation_euler.z += math.radians(1)
             elif event.value == 'RELEASE' and event.ctrl:
-                variables.target_object.rotation_euler.z += math.radians(10)
+                variables.target_object.rotation_euler.z += math.radians(15)
             return {'RUNNING_MODAL'}
         
         elif event.type == 'NUMPAD_4':
             if event.value == 'PRESS' and not event.ctrl and not event.shift and not event.alt:
                 variables.target_object.rotation_euler.z += math.radians(-1)
             elif event.value == 'RELEASE' and event.ctrl:
-                variables.target_object.rotation_euler.z += math.radians(-10)
+                variables.target_object.rotation_euler.z += math.radians(-15)
             return {'RUNNING_MODAL'}
         
         elif event.type == 'NUMPAD_7':
             if event.value == 'PRESS' and not event.ctrl and not event.shift and not event.alt:
                 variables.camera_object.rotation_euler.rotate_axis("Z", math.radians(-1))
             elif event.value == 'RELEASE' and event.ctrl:
-                variables.camera_object.rotation_euler.rotate_axis("Z", math.radians(-10))
+                variables.camera_object.rotation_euler.rotate_axis("Z", math.radians(-15))
             return {'RUNNING_MODAL'}
         
         elif event.type == 'NUMPAD_9':
             if event.value == 'PRESS' and not event.ctrl and not event.shift and not event.alt:
                 variables.camera_object.rotation_euler.rotate_axis("Z", math.radians(1))
             elif event.value == 'RELEASE' and event.ctrl:
-                variables.camera_object.rotation_euler.rotate_axis("Z", math.radians(10))
+                variables.camera_object.rotation_euler.rotate_axis("Z", math.radians(15))
             return {'RUNNING_MODAL'}
         
         elif event.type == 'NUMPAD_1':
@@ -312,6 +307,7 @@ class CI_OT_camera_it(bpy.types.Operator):
                     variables.camera_object.data.dof.aperture_fstop = variables.camera_aperture + 5
                     variables.camera_aperture = variables.camera_object.data.dof.aperture_fstop
 
+            draw_camera_info()
             return {'RUNNING_MODAL'}
         
         elif event.type == 'NUMPAD_MINUS':
@@ -349,7 +345,7 @@ class CI_OT_camera_it(bpy.types.Operator):
                     variables.camera_aperture = variables.camera_object.data.dof.aperture_fstop
 
             elif event.value == 'RELEASE' and event.ctrl:
-                if variables.num_five == 0:
+                if variables.num_zero == 0:
                     if variables.camera_lens > 1200:
                         variables.camera_object.data.lens = 1200
                     elif variables.camera_lens > 800:
@@ -416,6 +412,7 @@ class CI_OT_camera_it(bpy.types.Operator):
                         variables.camera_object.data.lens = 12
                     elif variables.camera_lens > 1:
                         variables.camera_object.data.lens = variables.camera_lens - 1
+                        
 
                     variables.camera_lens = variables.camera_object.data.lens
 
@@ -426,7 +423,8 @@ class CI_OT_camera_it(bpy.types.Operator):
                 elif variables.num_zero == 2:
                     variables.camera_object.data.dof.aperture_fstop = variables.camera_aperture - 5
                     variables.camera_aperture = variables.camera_object.data.dof.aperture_fstop
-
+            
+            draw_camera_info()
             return {'RUNNING_MODAL'}
         
         # 鼠标移动直接 回到 modal
@@ -434,11 +432,14 @@ class CI_OT_camera_it(bpy.types.Operator):
             return {'RUNNING_MODAL'}
                 
         elif event.type == 'ESC':
-            #bpy.data.objects.remove(variables.target_object, do_unlink=True)
-            bpy.types.SpaceView3D.draw_handler_remove(self.handle_backgroud, 'WINDOW')
+            # 先临时保存当前摄像机的 matrix_world ，删除target_object 之后再赋值给活动摄像头
+            temp_matrix = variables.camera_object.matrix_world.copy()
 
-            # 最后去除注释
-            bpy.ops.view3d.view_camera('INVOKE_DEFAULT')
+            bpy.data.objects.remove(variables.target_object, do_unlink=True)
+
+            variables.camera_object.matrix_world = temp_matrix
+
+            bpy.types.SpaceView3D.draw_handler_remove(self.handle_backgroud, 'WINDOW')
 
             # 每次退出需要清零 matrix_world
             variables.target_location = Vector((0.0, 0.0, 0.0))
@@ -448,6 +449,8 @@ class CI_OT_camera_it(bpy.types.Operator):
             variables.target_object = None
             variables.camera_object = None
 
+            # 最后去除注释
+            bpy.ops.view3d.view_camera('INVOKE_DEFAULT')
 
             # 清理残留图片纹理
             if icons_move_rotate.move_rotate_statu:
@@ -461,6 +464,11 @@ class CI_OT_camera_it(bpy.types.Operator):
             if icons_unlock_lock.unlock_lock_statu:
                 icons_unlock_lock.unlock_lock_statu.cleanup()
                 icons_unlock_lock.unlock_lock_statu = None
+
+            # 测试成功后删除注释
+            if camera_info.camera_info_statu:
+                camera_info.camera_info_statu.cleanup()
+                camera_info.camera_info_statu = None
 
 
             return {'FINISHED'}
