@@ -15,7 +15,7 @@ from . import variables
 
 
 
-class CI_OT_camera_it_invoke(bpy.types.Operator):
+class CC_OT_cam_compo_invoke(bpy.types.Operator):
     bl_idname = "view3d.cam_compo_invoke"
     bl_label = "快速设置摄像机"
     bl_description = "快速设置摄像机"
@@ -78,7 +78,7 @@ class CI_OT_camera_it_invoke(bpy.types.Operator):
         return {'FINISHED'}
 
 
-class CI_OT_camera_it(bpy.types.Operator):
+class CC_OT_cam_compo_multi(bpy.types.Operator):
     bl_idname = "view3d.cam_compo_multi"
     bl_label = "快速设置摄像机"
     bl_description = "快速设置摄像机"
