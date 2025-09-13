@@ -1,20 +1,20 @@
 import bpy
 from mathutils import Vector
 
+target_object_size = 0
+
 single_camera = True
 
 target_location = Vector((0.0, 0.0, 0.0))
 
 camera_location = Vector((0.0, 0.0, 0.0))
 
-#cam_target_x = 0
-#cam_target_y = 0
+origin_camera_location = None
 
 cam_target_distance = 0
 cam_target_distance_factor = 0
 
 target_object = None
-#refer_object = None
 camera_object = None
 
 camera_lens = 0

@@ -42,27 +42,42 @@ class CC_OT_cam_compo_invoke(bpy.types.Operator):
 
         if not variables.single_camera:
 
-            for i in bpy.context.selected_objects:
-                variables.target_location = variables.target_location + i.matrix_world.translation
+            objs = [obj for obj in bpy.context.selected_objects if obj != bpy.context.active_object]
 
-            variables.target_location = variables.target_location - bpy.context.active_object.matrix_world.translation
-            variables.target_location = variables.target_location / (len(bpy.context.selected_objects) - 1)
+            min_corner = Vector((float('inf'), float('inf'), float('inf')))
+            max_corner = Vector((float('-inf'), float('-inf'), float('-inf')))
+
+            for obj in objs:
+                for corner in obj.bound_box:
+                    world_corner = obj.matrix_world @ Vector(corner)
+                    min_corner.x = min(min_corner.x, world_corner.x)
+                    min_corner.y = min(min_corner.y, world_corner.y)
+                    min_corner.z = min(min_corner.z, world_corner.z)
+                    max_corner.x = max(max_corner.x, world_corner.x)
+                    max_corner.y = max(max_corner.y, world_corner.y)
+                    max_corner.z = max(max_corner.z, world_corner.z)
+
+            variables.target_location = (min_corner + max_corner) / 2
+
+            # 取最大长度
+            variables.target_object_size = max((max_corner.x - min_corner.x), (max_corner.y - min_corner.y), (max_corner.z - min_corner.z))
 
             bpy.ops.object.empty_add(type='SPHERE', radius=1.0, align='WORLD', location=variables.target_location)
 
             variables.target_object = context.active_object
             variables.target_object.name = variables.camera_object.name + "_TARGET"
 
-            bpy.ops.mesh.primitive_cube_add(size=2.0, align='WORLD', location=variables.target_location)
+            bpy.ops.mesh.primitive_cube_add(size=variables.target_object_size, align='WORLD', location=variables.target_location)
+
+            variables.camera_object.rotation_euler[0] = math.radians(90)
+            variables.camera_object.rotation_euler[1] = math.radians(0)
+            variables.camera_object.rotation_euler[2] = math.radians(0)
 
             #需要完全新建完mesh之后才能对准
             bpy.app.timers.register(lambda: (bpy.ops.view3d.camera_to_view_selected('INVOKE_DEFAULT'), None)[1], first_interval=0.01)
 
             bpy.app.timers.register(lambda: (bpy.data.objects.remove(bpy.context.active_object, do_unlink=True), None)[1], first_interval=0.01)
 
-            variables.camera_object.rotation_euler[0] = math.radians(90)
-            variables.camera_object.rotation_euler[1] = math.radians(0)
-            variables.camera_object.rotation_euler[2] = math.radians(0)
 
             variables.cam_target_distance = round((variables.camera_object.location - variables.target_object.location).length, 3)
 
@@ -127,7 +142,6 @@ class CC_OT_cam_compo_multi(bpy.types.Operator):
             elif event.value == 'RELEASE' and event.ctrl:
                 variables.camera_object.location += variables.camera_object.matrix_basis.to_quaternion() @ Vector((0, 0, -10 * variables.cam_target_distance_factor))
             return {'RUNNING_MODAL'}
-        
 
         elif event.type == 'NUMPAD_ASTERIX':
             if event.value == 'PRESS' and not event.ctrl and not event.shift and not event.alt:
@@ -149,7 +163,6 @@ class CC_OT_cam_compo_multi(bpy.types.Operator):
                     variables.camera_object.rotation_euler.rotate_axis("X", math.radians(-10))
             return {'RUNNING_MODAL'}
         
-        
         elif event.type == 'NUMPAD_2':
             if event.value == 'PRESS' and not event.ctrl and not event.shift and not event.alt:
                 if variables.num_five:
@@ -162,7 +175,6 @@ class CC_OT_cam_compo_multi(bpy.types.Operator):
                 else:
                     variables.camera_object.rotation_euler.rotate_axis("X", math.radians(10))
             return {'RUNNING_MODAL'}
-
 
         elif event.type == 'NUMPAD_6':
             if event.value == 'PRESS' and not event.ctrl and not event.shift and not event.alt:
@@ -343,6 +355,37 @@ class CC_OT_cam_compo_multi(bpy.types.Operator):
             draw_camera_info()
             return {'RUNNING_MODAL'}
         
+        elif event.type in {'UP_ARROW','DOWN_ARROW','LEFT_ARROW','RIGHT_ARROW'} and event.value == 'RELEASE':
+            variables.camera_object.parent = None
+
+            variables.target_object.rotation_euler[0] = math.radians(0)
+            variables.target_object.rotation_euler[1] = math.radians(0)
+            variables.target_object.rotation_euler[2] = math.radians(0)
+
+            variables.camera_object.rotation_euler[0] = math.radians(90)
+            variables.camera_object.rotation_euler[1] = math.radians(0)
+            variables.camera_object.rotation_euler[2] = math.radians(0)
+
+            bpy.ops.mesh.primitive_cube_add(size=variables.target_object_size, align='WORLD', location=variables.target_location)
+
+            bpy.app.timers.register(lambda: (bpy.ops.view3d.camera_to_view_selected('INVOKE_DEFAULT'), None)[1], first_interval=0.01)
+
+            bpy.app.timers.register(lambda: (bpy.data.objects.remove(bpy.context.active_object, do_unlink=True), None)[1], first_interval=0.01)
+
+            variables.camera_object.parent = variables.target_object
+
+            # 右视图
+            if event.type == 'RIGHT_ARROW':
+                variables.target_object.rotation_euler[2] = math.radians(90)
+
+            elif event.type == 'LEFT_ARROW':
+                variables.target_object.rotation_euler[2] = math.radians(-90)
+
+            elif event.type == 'UP_ARROW':
+                variables.target_object.rotation_euler[2] = math.radians(180)   
+
+            return {'RUNNING_MODAL'}
+        
         # 鼠标移动直接 回到 modal
         elif event.type not in {'MOUSEMOVE','ESC','WHEELUPMOUSE','WHEELDOWNMOUSE','HOME'}:
             return {'RUNNING_MODAL'}
@@ -358,12 +401,15 @@ class CC_OT_cam_compo_multi(bpy.types.Operator):
             bpy.types.SpaceView3D.draw_handler_remove(self.handle_backgroud, 'WINDOW')
 
             # 每次退出需要清零 matrix_world
+            variables.target_object_size = 0
             variables.target_location = Vector((0.0, 0.0, 0.0))
             variables.camera_location = Vector((0.0, 0.0, 0.0))
             variables.cam_target_distance = 0
             variables.cam_target_distance_factor = 0
             variables.target_object = None
             variables.camera_object = None
+
+            variables.origin_camera_location = None
 
             # 最后去除注释
             bpy.ops.view3d.view_camera('INVOKE_DEFAULT')
@@ -654,17 +700,12 @@ class CC_OT_cam_compo_single(bpy.types.Operator):
             
             draw_camera_info()
             return {'RUNNING_MODAL'}
-        
+                
         # 鼠标移动直接 回到 modal
         elif event.type not in {'MOUSEMOVE','ESC','WHEELUPMOUSE','WHEELDOWNMOUSE','HOME'}:
             return {'RUNNING_MODAL'}
                 
         elif event.type == 'ESC':
-            # 先临时保存当前摄像机的 matrix_world ，删除target_object 之后再赋值给活动摄像头
-            temp_matrix = variables.camera_object.matrix_world.copy()
-
-            variables.camera_object.matrix_world = temp_matrix
-
             bpy.types.SpaceView3D.draw_handler_remove(self.handle_backgroud, 'WINDOW')
 
             # 每次退出需要清零 matrix_world
