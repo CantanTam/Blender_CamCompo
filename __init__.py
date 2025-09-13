@@ -1,5 +1,7 @@
 import bpy
 import os
+from bpy.props import FloatProperty, FloatVectorProperty, CollectionProperty, IntProperty
+
 
 bl_info = {
     "name": "CamCompo",
@@ -23,6 +25,13 @@ from .cam_compo import (
     CC_OT_cam_compo_single,
 )
 
+from .test_matrix import (
+    CC_OT_test_matrix,
+    CC_OT_get_matrix,
+)
+
+from .camera_snapshot_list import CameraSnapshot
+
 from .right_click import rightclick_cam_control
 
 def register_keymaps():
@@ -41,6 +50,11 @@ def register():
     bpy.utils.register_class(CC_OT_cam_compo_invoke)
     bpy.utils.register_class(CC_OT_cam_compo_multi)
     bpy.utils.register_class(CC_OT_cam_compo_single)
+    bpy.utils.register_class(CC_OT_test_matrix)
+    bpy.utils.register_class(CC_OT_get_matrix)
+    bpy.utils.register_class(CameraSnapshot)
+    bpy.types.Object.camera_snapshots = CollectionProperty(type=CameraSnapshot)
+    bpy.types.Object.camera_snapshots_index = IntProperty(default=0)
     register_keymaps()
     bpy.types.VIEW3D_MT_object_context_menu.append(rightclick_cam_control)
     
@@ -49,6 +63,11 @@ def register():
 def unregister():
     bpy.types.VIEW3D_MT_object_context_menu.remove(rightclick_cam_control)
     unregister_keymaps()
+    del bpy.types.Object.camera_snapshots_index
+    del bpy.types.Object.camera_snapshots
+    bpy.utils.unregister_class(CameraSnapshot)
+    bpy.utils.unregister_class(CC_OT_get_matrix)
+    bpy.utils.unregister_class(CC_OT_test_matrix)
     bpy.utils.unregister_class(CC_OT_cam_compo_single)
     bpy.utils.unregister_class(CC_OT_cam_compo_multi)
     bpy.utils.unregister_class(CC_OT_cam_compo_invoke)

@@ -1,5 +1,7 @@
 import bpy,math
 from mathutils import Vector,Matrix
+from . import variables
+
 from .background import draw_background
 from .icons_move_rotate import draw_move_rotate
 from . import icons_move_rotate
@@ -11,7 +13,8 @@ from . import icons_unlock_lock
 from .camera_info import draw_camera_info
 from . import camera_info
 
-from . import variables
+from .cam_track_target import track_to_target
+
 
 
 
@@ -78,7 +81,6 @@ class CC_OT_cam_compo_invoke(bpy.types.Operator):
 
             bpy.app.timers.register(lambda: (bpy.data.objects.remove(bpy.context.active_object, do_unlink=True), None)[1], first_interval=0.01)
 
-
             variables.cam_target_distance = round((variables.camera_object.location - variables.target_object.location).length, 3)
 
             variables.cam_target_distance_factor = variables.cam_target_distance * 0.01
@@ -127,6 +129,7 @@ class CC_OT_cam_compo_multi(bpy.types.Operator):
         elif event.type =='NUMPAD_PERIOD':
             if event.value == 'RELEASE':
                 variables.num_period = not variables.num_period
+            track_to_target()
             draw_unlock_lock()
             return {'RUNNING_MODAL'}
         
@@ -141,6 +144,7 @@ class CC_OT_cam_compo_multi(bpy.types.Operator):
                 variables.camera_object.location += variables.camera_object.matrix_basis.to_quaternion() @ Vector((0, 0, -1 * variables.cam_target_distance_factor))
             elif event.value == 'RELEASE' and event.ctrl:
                 variables.camera_object.location += variables.camera_object.matrix_basis.to_quaternion() @ Vector((0, 0, -10 * variables.cam_target_distance_factor))
+            track_to_target()    
             return {'RUNNING_MODAL'}
 
         elif event.type == 'NUMPAD_ASTERIX':
@@ -148,17 +152,20 @@ class CC_OT_cam_compo_multi(bpy.types.Operator):
                 variables.camera_object.location += variables.camera_object.matrix_basis.to_quaternion() @ Vector((0, 0, variables.cam_target_distance_factor))
             elif event.value == 'RELEASE' and event.ctrl:
                 variables.camera_object.location += variables.camera_object.matrix_basis.to_quaternion() @ Vector((0, 0, 10 * variables.cam_target_distance_factor))
+            track_to_target()
             return {'RUNNING_MODAL'}
         
         elif event.type == 'NUMPAD_8':
             if event.value == 'PRESS' and not event.ctrl and not event.shift and not event.alt:
                 if variables.num_five:
                     variables.camera_object.location += Vector((0, 0, 0.1 * variables.cam_target_distance_factor))
+                    track_to_target()
                 else:
                     variables.camera_object.rotation_euler.rotate_axis("X", math.radians(-1))
             elif event.value == 'RELEASE' and event.ctrl:
                 if variables.num_five:
                     variables.camera_object.location += Vector((0, 0, variables.cam_target_distance_factor))
+                    track_to_target()
                 else:
                     variables.camera_object.rotation_euler.rotate_axis("X", math.radians(-10))
             return {'RUNNING_MODAL'}
@@ -167,11 +174,13 @@ class CC_OT_cam_compo_multi(bpy.types.Operator):
             if event.value == 'PRESS' and not event.ctrl and not event.shift and not event.alt:
                 if variables.num_five:
                     variables.camera_object.location += Vector((0, 0, -0.1 * variables.cam_target_distance_factor))
+                    track_to_target()
                 else:
                     variables.camera_object.rotation_euler.rotate_axis("X", math.radians(1))
             elif event.value == 'RELEASE' and event.ctrl:
                 if variables.num_five:
                     variables.camera_object.location += Vector((0, 0, -variables.cam_target_distance_factor))
+                    track_to_target()
                 else:
                     variables.camera_object.rotation_euler.rotate_axis("X", math.radians(10))
             return {'RUNNING_MODAL'}
@@ -384,6 +393,10 @@ class CC_OT_cam_compo_multi(bpy.types.Operator):
             elif event.type == 'UP_ARROW':
                 variables.target_object.rotation_euler[2] = math.radians(180)   
 
+            return {'RUNNING_MODAL'}
+        
+        elif event.type == 'NUMPAD_ENTER' and event.value == 'RELEASE':
+            bpy.ops.cc.test_matrix()
             return {'RUNNING_MODAL'}
         
         # 鼠标移动直接 回到 modal

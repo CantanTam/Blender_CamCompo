@@ -7,4 +7,5 @@ def rightclick_cam_control(self, context):
     layout = self.layout
     layout.separator()
     layout.operator("view3d.cam_compo_invoke",text="进入CamControll", icon='CAMERA_DATA')
+    layout.operator("cc.get_matrix", text="test matrix")
     

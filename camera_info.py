@@ -1,5 +1,5 @@
-import bpy,gpu,os,blf
-from gpu_extras.batch import batch_for_shader
+import bpy,gpu,blf
+#from gpu_extras.batch import batch_for_shader
 from . import variables
 
 camera_info_statu = None

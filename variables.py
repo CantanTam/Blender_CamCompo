@@ -22,6 +22,9 @@ camera_distance = 0
 camera_aperture = 0
 
 num_five = True
-num_period = False
+num_period = False # True → 追踪；False → 放弃追踪
 num_zero = 0 # 0 → lens；1 → distance； 2 → aperture
+
+
+test_matrix = None
 
