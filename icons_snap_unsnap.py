@@ -3,23 +3,17 @@ from gpu_extras.batch import batch_for_shader
 from . import variables
 
 # 全局控制变量
-unlock_lock_statu = None
+snap_unsnap_statu = None
 
 
 
-class DrawUnlockLock:
+class DrawSnapUnsnap:
     def __init__(self,):
-        if not variables.single_camera:
-            if variables.num_period :
-                self.image_path = 'ICON_LOCK.png'
-            else:
-                self.image_path = 'ICON_UNLOCK.png'
-
+        if variables.snapshot_statu == True :
+            self.image_path = 'ICON_SNAP.png'
         else:
-            self.image_path = 'ICON_UNLOCK_SINGLE.png'
-        
+            self.image_path = 'ICON_UNSNAP.png'
         self.handler = None
-        #self.needs_redraw = False
 
         # 使用固定 notices 文件夹
         if not os.path.isabs(self.image_path):
@@ -74,13 +68,13 @@ class DrawUnlockLock:
 
 
 
-def draw_unlock_lock():
-    global unlock_lock_statu
-    if unlock_lock_statu:
-        unlock_lock_statu.cleanup()
-        unlock_lock_statu = None
+def draw_snap_unsnap():
+    global snap_unsnap_statu
+    if snap_unsnap_statu:
+        snap_unsnap_statu.cleanup()
+        snap_unsnap_statu = None
     
-    unlock_lock_statu = DrawUnlockLock()
-    return unlock_lock_statu
+    snap_unsnap_statu = DrawSnapUnsnap()
+    return snap_unsnap_statu
 
 

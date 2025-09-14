@@ -1,6 +1,8 @@
 import bpy
 from mathutils import Vector
 
+camcompo_statu = False
+
 target_object_size = 0
 
 single_camera = True
@@ -25,6 +27,7 @@ num_five = True
 num_period = False # True → 追踪；False → 放弃追踪
 num_zero = 0 # 0 → lens；1 → distance； 2 → aperture
 
-
 test_matrix = None
+
+snapshot_statu = False
 

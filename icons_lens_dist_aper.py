@@ -43,10 +43,10 @@ class DrawLensDistAper:
     def draw(self):
         self.vertices = {
             "pos": [
-                ((bpy.context.region.width - 595) * 0.5, 0),
-                ((bpy.context.region.width + 595) * 0.5, 0),
-                ((bpy.context.region.width + 595) * 0.5, 85),
-                ((bpy.context.region.width - 595) * 0.5, 85)
+                ((bpy.context.region.width - 680) * 0.5, 0),
+                ((bpy.context.region.width + 680) * 0.5, 0),
+                ((bpy.context.region.width + 680) * 0.5, 85),
+                ((bpy.context.region.width - 680) * 0.5, 85)
             ],
             "texCoord": [(0, 0), (1, 0), (1, 1), (0, 1)],
         }

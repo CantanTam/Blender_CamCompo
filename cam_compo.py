@@ -9,9 +9,10 @@ from .icons_lens_dist_aper import draw_lens_dist_aper
 from . import icons_lens_dist_aper
 from .icons_unlock_lock import draw_unlock_lock
 from . import icons_unlock_lock
-
 from .camera_info import draw_camera_info
 from . import camera_info
+from .icons_snap_unsnap import draw_snap_unsnap
+from . import icons_snap_unsnap
 
 from .cam_track_target import track_to_target
 
@@ -37,6 +38,8 @@ class CC_OT_cam_compo_invoke(bpy.types.Operator):
         context.active_object.data.dof.use_dof = True
 
         bpy.context.scene.camera = context.active_object
+
+        variables.camcompo_statu = True
 
         if len(context.selected_objects) == 1:
             variables.single_camera = True
@@ -112,9 +115,8 @@ class CC_OT_cam_compo_multi(bpy.types.Operator):
         draw_move_rotate()
         draw_lens_dist_aper()
         draw_unlock_lock()
-
-        #测试成功后删除注释
         draw_camera_info()
+        draw_snap_unsnap()
 
         context.window_manager.modal_handler_add(self)
         return {'RUNNING_MODAL'}
@@ -395,12 +397,12 @@ class CC_OT_cam_compo_multi(bpy.types.Operator):
 
             return {'RUNNING_MODAL'}
         
-        elif event.type == 'NUMPAD_ENTER' and event.value == 'RELEASE':
-            bpy.ops.cc.test_matrix()
+        elif event.type in {'NUMPAD_ENTER','RET'} and event.value == 'RELEASE':
+            bpy.ops.view3d.restore_snapshot()
             return {'RUNNING_MODAL'}
         
         # 鼠标移动直接 回到 modal
-        elif event.type not in {'MOUSEMOVE','ESC','WHEELUPMOUSE','WHEELDOWNMOUSE','HOME'}:
+        elif event.type not in {'MOUSEMOVE','ESC','WHEELUPMOUSE','WHEELDOWNMOUSE','HOME','LEFTMOUSE'}:
             return {'RUNNING_MODAL'}
                 
         elif event.type == 'ESC':
@@ -424,6 +426,8 @@ class CC_OT_cam_compo_multi(bpy.types.Operator):
 
             variables.origin_camera_location = None
 
+            variables.camcompo_statu = False
+
             # 最后去除注释
             bpy.ops.view3d.view_camera('INVOKE_DEFAULT')
 
@@ -444,6 +448,10 @@ class CC_OT_cam_compo_multi(bpy.types.Operator):
             if camera_info.camera_info_statu:
                 camera_info.camera_info_statu.cleanup()
                 camera_info.camera_info_statu = None
+
+            if icons_snap_unsnap.snap_unsnap_statu:
+                icons_snap_unsnap.snap_unsnap_statu.cleanup()
+                icons_snap_unsnap.snap_unsnap_statu = None
 
 
             return {'FINISHED'}
@@ -472,9 +480,9 @@ class CC_OT_cam_compo_single(bpy.types.Operator):
         draw_move_rotate()
         draw_lens_dist_aper()
         draw_unlock_lock()
-
-        #测试成功后删除注释
         draw_camera_info()
+        draw_snap_unsnap()
+        
 
         context.window_manager.modal_handler_add(self)
         return {'RUNNING_MODAL'}
@@ -713,9 +721,13 @@ class CC_OT_cam_compo_single(bpy.types.Operator):
             
             draw_camera_info()
             return {'RUNNING_MODAL'}
+        
+        elif event.type in {'NUMPAD_ENTER','RET'} and event.value == 'RELEASE':
+            bpy.ops.view3d.restore_snapshot()
+            return {'RUNNING_MODAL'}
                 
         # 鼠标移动直接 回到 modal
-        elif event.type not in {'MOUSEMOVE','ESC','WHEELUPMOUSE','WHEELDOWNMOUSE','HOME'}:
+        elif event.type not in {'MOUSEMOVE','ESC','WHEELUPMOUSE','WHEELDOWNMOUSE','HOME','LEFTMOUSE'}:
             return {'RUNNING_MODAL'}
                 
         elif event.type == 'ESC':
@@ -723,6 +735,8 @@ class CC_OT_cam_compo_single(bpy.types.Operator):
 
             # 每次退出需要清零 matrix_world
             variables.camera_object = None
+
+            variables.camcompo_statu = False
 
             # 最后去除注释
             bpy.ops.view3d.view_camera('INVOKE_DEFAULT')
@@ -744,6 +758,10 @@ class CC_OT_cam_compo_single(bpy.types.Operator):
             if camera_info.camera_info_statu:
                 camera_info.camera_info_statu.cleanup()
                 camera_info.camera_info_statu = None
+
+            if icons_snap_unsnap.snap_unsnap_statu:
+                icons_snap_unsnap.snap_unsnap_statu.cleanup()
+                icons_snap_unsnap.snap_unsnap_statu = None
 
 
             return {'FINISHED'}
