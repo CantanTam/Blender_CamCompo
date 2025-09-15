@@ -14,6 +14,7 @@ from . import camera_info
 from .icons_snap_unsnap import draw_snap_unsnap
 from . import icons_snap_unsnap
 
+from .camera_snapshot_sidebar import can_snapshot
 from .cam_track_target import track_to_target
 
 
@@ -398,7 +399,8 @@ class CC_OT_cam_compo_multi(bpy.types.Operator):
             return {'RUNNING_MODAL'}
         
         elif event.type in {'NUMPAD_ENTER','RET'} and event.value == 'RELEASE':
-            bpy.ops.view3d.restore_snapshot()
+            if can_snapshot():
+                bpy.ops.view3d.restore_snapshot()
             return {'RUNNING_MODAL'}
         
         # 鼠标移动直接 回到 modal
@@ -723,7 +725,8 @@ class CC_OT_cam_compo_single(bpy.types.Operator):
             return {'RUNNING_MODAL'}
         
         elif event.type in {'NUMPAD_ENTER','RET'} and event.value == 'RELEASE':
-            bpy.ops.view3d.restore_snapshot()
+            if can_snapshot():
+                bpy.ops.view3d.restore_snapshot()
             return {'RUNNING_MODAL'}
                 
         # 鼠标移动直接 回到 modal
