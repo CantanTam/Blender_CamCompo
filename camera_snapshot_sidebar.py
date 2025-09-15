@@ -3,6 +3,13 @@ from datetime import datetime
 from . import snapshot_bar
 from . import snapshot_bar_invoke
 from . import variables
+from . import snapshot_detect
+from .icons_snap_unsnap import draw_snap_unsnap
+from .camera_info import draw_camera_info
+
+class CC_UL_camera_snapshots(bpy.types.UIList):    
+    def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
+        layout.label(text=item.name, icon='BOOKMARKS')
 
 class CC_PT_snapshot_sidebar(bpy.types.Panel):
     bl_label = "构图快照"
@@ -12,36 +19,76 @@ class CC_PT_snapshot_sidebar(bpy.types.Panel):
     bl_category = "CamCompo"
 
     def draw(self, context):
+        camera = context.scene.camera
+        if camera is None or context.mode != 'OBJECT':
+            return
+        
         layout = self.layout
+
         row = layout.row(align=True)
-        row.operator("view3d.prev_snapshot", text="◀")
-        row.operator("view3d.restore_snapshot", text="💾") #这里也可以使用文字
-        row.operator("view3d.next_snapshot", text="▶")
+
+        col = row.column(align=True)
+        col.template_list(
+            "CC_UL_camera_snapshots",    # 自定义 UIList
+            "",
+            camera,                          # 数据源对象
+            "camera_snapshots",           # CollectionProperty 名
+            camera,                          # active object
+            "camera_snapshots_index",     # 活动索引属性
+            rows=8,                        # 显示行数
+        )
+
+        if camera.camera_snapshots:
+            index = camera.camera_snapshots_index
+            snapshot = camera.camera_snapshots[index]
+            col.separator()
+            col.prop(snapshot, "name", text="",icon='GREASEPENCIL')
+        
+        row.separator()
+
+        col = row.column(align=True)
+        col.operator("view3d.restore_snapshot", text="", icon="ADD")
+        col.operator("view3d.remove_snapshot", text="", icon="REMOVE")
+        col.separator()
+        if len(context.selected_objects) > 0 and context.selected_objects[-1].type == 'CAMERA':
+            col.operator("view3d.cam_compo_invoke", text="", icon="CON_CAMERASOLVER")
+        else:
+            col.operator("view3d.liveview_snapshot", text="", icon="HIDE_OFF")
+        col.operator("view3d.goto_snapshot", text="", icon="LOOP_BACK")
+        col.separator()
+        col.operator("view3d.prev_snapshot", text="", icon="TRIA_UP")
+        col.operator("view3d.next_snapshot", text="", icon="TRIA_DOWN")
+
+
 
 class CC_OT_prev_snapshot(bpy.types.Operator):
     bl_idname = "view3d.prev_snapshot"
-    bl_label = "上一个快照"
-    bl_description = "查看上一个快照"
+    bl_label = "跳到上一个快照"
+    bl_description = "跳到上一个快照"
     bl_options = {'REGISTER', 'UNDO'}
 
     @classmethod
     def poll(cls, context):
-        return context.scene.camera is not None
+        return len(context.scene.camera.camera_snapshots) > 0 and context.scene.camera.camera_snapshots_index > 0
 
     def execute(self, context):
+        context.scene.camera.camera_snapshots_index -= 1
+        bpy.ops.view3d.goto_snapshot()
         return {'FINISHED'}
     
 class CC_OT_next_snapshot(bpy.types.Operator):
     bl_idname = "view3d.next_snapshot"
-    bl_label = "查看下一个快照"
-    bl_description = "查看下一个快照"
+    bl_label = "跳到下一个快照"
+    bl_description = "跳到下一个快照"
     bl_options = {'REGISTER', 'UNDO'}
 
     @classmethod
     def poll(cls, context):
-        return context.scene.camera is not None 
+        return len(context.scene.camera.camera_snapshots) > 0 and context.scene.camera.camera_snapshots_index < len(context.scene.camera.camera_snapshots) - 1 
 
     def execute(self, context):
+        context.scene.camera.camera_snapshots_index += 1
+        bpy.ops.view3d.goto_snapshot()
         return {'FINISHED'}
     
 class CC_OT_restore_snapshot(bpy.types.Operator):
@@ -52,7 +99,7 @@ class CC_OT_restore_snapshot(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
-        return context.scene.camera is not None and can_snapshot()
+        return context.scene.camera is not None and snapshot_detect.can_snapshot()
 
     def execute(self, context):
         bpy.context.scene.camera.camera_snapshots.add()
@@ -65,7 +112,6 @@ class CC_OT_restore_snapshot(bpy.types.Operator):
         bpy.context.scene.camera.camera_snapshots[-1].aperture_fstop = bpy.context.scene.camera.data.dof.aperture_fstop
 
         bpy.context.scene.camera.camera_snapshots[-1].matrix_world = [bpy.context.scene.camera.matrix_world[i][j] for j in range(4) for i in range(4)]
-        #bpy.context.scene.camera.camera_snapshots[-1].matrix_world = bpy.context.scene.camera.matrix_world
 
         if not variables.camcompo_statu:
             for i in range(25):
@@ -81,11 +127,11 @@ class CC_OT_restore_snapshot(bpy.types.Operator):
                     )[-1],
                 first_interval=0.04 * 35
                 )
-
+            
         else:
             for i in range(24):
                 image = f'ICON_SNAP_{i+1}.png'
-                t = 0.04 + i * 0.04
+                t = 0.08 + i * 0.08
                 bpy.app.timers.register(lambda image=image: snapshot_bar_invoke.draw_camera_snapshot_invoke(image), first_interval=t)
 
             bpy.app.timers.register(
@@ -94,31 +140,69 @@ class CC_OT_restore_snapshot(bpy.types.Operator):
                     setattr(snapshot_bar_invoke, "camera_snapshot_state_invoke", None),
                     None
                     )[-1],
-                first_interval=0.04 * 34
+                first_interval=0.08 * 34
                 )
+            
+            bpy.app.timers.register(draw_snap_unsnap, first_interval=0.08 * 25 )
 
         return {'FINISHED'}
     
-def can_snapshot():
-    camera = bpy.context.scene.camera
-    snap_list = bpy.context.scene.camera.camera_snapshots
+class CC_OT_remove_snapshot(bpy.types.Operator):
+    bl_idname = "view3d.remove_snapshot"
+    bl_label = "删除快照"
+    bl_description = "删除选中快照"
+    bl_options = {'REGISTER', 'UNDO'}
 
-    if len(snap_list) == 0:
-        return True
-    else:
-        snap_set = {
-            str(round(snap.lens, 2))
-            + str(round(snap.focus_distance, 3))
-            + str(round(snap.aperture_fstop, 2))
-            + ''.join(str(round(v, 4)) for row in snap.matrix_world for v in row)
-            for snap in snap_list
-        }
+    @classmethod
+    def poll(cls, context):
+        return len(context.scene.camera.camera_snapshots) > 0
 
-        current_snap = str(round(camera.data.lens, 2)) + str(round(camera.data.dof.focus_distance, 3)) + str(round(camera.data.dof.aperture_fstop, 2)) + ''.join(str(round(v, 4)) for row in camera.matrix_world for v in row)
+    def execute(self, context):
+        camera = context.scene.camera
+        index = camera.camera_snapshots_index
 
-        if current_snap not in snap_set:
-            return True
+        camera.camera_snapshots.remove(index)
 
+        if camera.camera_snapshots_index > 0:
+            camera.camera_snapshots_index -= 1
+        return {'FINISHED'}
+    
+class CC_OT_liveview_snapshot(bpy.types.Operator):
+    bl_idname = "view3d.liveview_snapshot"
+    bl_label = "实时预览快照"
+    bl_description = "实时预览快照"
+    bl_options = {'REGISTER', 'UNDO'}
 
-    return False
-                
+    @classmethod
+    def poll(cls, context):
+        return len(context.scene.camera.camera_snapshots) > 0
+
+    def execute(self, context):
+        return {'FINISHED'}
+    
+class CC_OT_goto_snapshot(bpy.types.Operator):
+    bl_idname = "view3d.goto_snapshot"
+    bl_label = "跳到快照"
+    bl_description = "跳到选中快照"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    @classmethod
+    def poll(cls, context):
+        return len(context.scene.camera.camera_snapshots) > 0
+
+    def execute(self, context):
+        camera = context.scene.camera
+        index = camera.camera_snapshots_index
+
+        context.scene.camera.data.lens = camera.camera_snapshots[index].lens
+        context.scene.camera.data.dof.focus_distance = camera.camera_snapshots[index].focus_distance
+        context.scene.camera.data.dof.aperture_fstop = camera.camera_snapshots[index].aperture_fstop
+        context.scene.camera.matrix_world = camera.camera_snapshots[index].matrix_world
+
+        if variables.camcompo_statu:
+            variables.camera_lens = variables.camera_object.data.lens
+            variables.camera_distance = variables.camera_object.data.dof.focus_distance
+            variables.camera_aperture = variables.camera_object.data.dof.aperture_fstop
+            draw_camera_info()
+
+        return {'FINISHED'}

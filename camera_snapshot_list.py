@@ -6,7 +6,7 @@ from mathutils import Matrix
 
 # 定义数组的单个元素
 class CameraSnapshot(PropertyGroup):
-    name: StringProperty(name="Snapshot name")
+    name: StringProperty(name="重命名快照")
     lens: FloatProperty(name="Lens")
     focus_distance: FloatProperty(name="Focus Distance")
     aperture_fstop: FloatProperty(name="Aperture f/stop")

@@ -33,10 +33,14 @@ from .test_matrix import (
 from .camera_snapshot_list import CameraSnapshot
 
 from .camera_snapshot_sidebar import (
+    CC_UL_camera_snapshots,
     CC_PT_snapshot_sidebar,
     CC_OT_prev_snapshot,
     CC_OT_next_snapshot,
     CC_OT_restore_snapshot,
+    CC_OT_remove_snapshot,
+    CC_OT_liveview_snapshot,
+    CC_OT_goto_snapshot,
 )
 
 from .right_click import rightclick_cam_control
@@ -62,11 +66,14 @@ def register():
     bpy.utils.register_class(CameraSnapshot)
     bpy.types.Object.camera_snapshots = CollectionProperty(type=CameraSnapshot)
     bpy.types.Object.camera_snapshots_index = IntProperty(default=0)
-
+    bpy.utils.register_class(CC_UL_camera_snapshots)
     bpy.utils.register_class(CC_PT_snapshot_sidebar)
     bpy.utils.register_class(CC_OT_prev_snapshot)
     bpy.utils.register_class(CC_OT_next_snapshot)
     bpy.utils.register_class(CC_OT_restore_snapshot)
+    bpy.utils.register_class(CC_OT_remove_snapshot)
+    bpy.utils.register_class(CC_OT_liveview_snapshot)
+    bpy.utils.register_class(CC_OT_goto_snapshot)
     register_keymaps()
     bpy.types.VIEW3D_MT_object_context_menu.append(rightclick_cam_control)
     
@@ -76,10 +83,14 @@ def unregister():
     bpy.types.VIEW3D_MT_object_context_menu.remove(rightclick_cam_control)
     unregister_keymaps()
 
+    bpy.utils.unregister_class(CC_OT_goto_snapshot)
+    bpy.utils.unregister_class(CC_OT_liveview_snapshot)
+    bpy.utils.unregister_class(CC_OT_remove_snapshot)
     bpy.utils.unregister_class(CC_OT_restore_snapshot)
     bpy.utils.unregister_class(CC_OT_next_snapshot)
     bpy.utils.unregister_class(CC_OT_prev_snapshot)
     bpy.utils.unregister_class(CC_PT_snapshot_sidebar)
+    bpy.utils.unregister_class(CC_UL_camera_snapshots)
     del bpy.types.Object.camera_snapshots_index
     del bpy.types.Object.camera_snapshots
     bpy.utils.unregister_class(CameraSnapshot)

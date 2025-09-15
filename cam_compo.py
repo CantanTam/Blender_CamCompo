@@ -13,12 +13,23 @@ from .camera_info import draw_camera_info
 from . import camera_info
 from .icons_snap_unsnap import draw_snap_unsnap
 from . import icons_snap_unsnap
+from .icons_snap_unsnap import draw_snap_unsnap
 
-from .camera_snapshot_sidebar import can_snapshot
 from .cam_track_target import track_to_target
 
+from . import snapshot_detect
 
 
+def is_camera_view():
+    for area in bpy.context.screen.areas:
+        if area.type != 'VIEW_3D':
+            continue
+        for space in area.spaces:
+            if space.type != 'VIEW_3D':
+                continue
+            if space.region_3d.view_perspective == 'CAMERA':
+                return True
+    return False
 
 class CC_OT_cam_compo_invoke(bpy.types.Operator):
     bl_idname = "view3d.cam_compo_invoke"
@@ -28,7 +39,7 @@ class CC_OT_cam_compo_invoke(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
-        return bpy.context.active_object.type == 'CAMERA' and bpy.context.mode == 'OBJECT'
+        return bpy.context.active_object.type == 'CAMERA' and bpy.context.mode == 'OBJECT' and not is_camera_view()
 
     def execute(self, context):
         variables.camera_object = context.active_object
@@ -117,7 +128,7 @@ class CC_OT_cam_compo_multi(bpy.types.Operator):
         draw_lens_dist_aper()
         draw_unlock_lock()
         draw_camera_info()
-        draw_snap_unsnap()
+        bpy.app.timers.register(draw_snap_unsnap,first_interval=0.01)
 
         context.window_manager.modal_handler_add(self)
         return {'RUNNING_MODAL'}
@@ -147,7 +158,8 @@ class CC_OT_cam_compo_multi(bpy.types.Operator):
                 variables.camera_object.location += variables.camera_object.matrix_basis.to_quaternion() @ Vector((0, 0, -1 * variables.cam_target_distance_factor))
             elif event.value == 'RELEASE' and event.ctrl:
                 variables.camera_object.location += variables.camera_object.matrix_basis.to_quaternion() @ Vector((0, 0, -10 * variables.cam_target_distance_factor))
-            track_to_target()    
+            track_to_target()
+            draw_snap_unsnap()    
             return {'RUNNING_MODAL'}
 
         elif event.type == 'NUMPAD_ASTERIX':
@@ -156,6 +168,7 @@ class CC_OT_cam_compo_multi(bpy.types.Operator):
             elif event.value == 'RELEASE' and event.ctrl:
                 variables.camera_object.location += variables.camera_object.matrix_basis.to_quaternion() @ Vector((0, 0, 10 * variables.cam_target_distance_factor))
             track_to_target()
+            draw_snap_unsnap() 
             return {'RUNNING_MODAL'}
         
         elif event.type == 'NUMPAD_8':
@@ -171,6 +184,7 @@ class CC_OT_cam_compo_multi(bpy.types.Operator):
                     track_to_target()
                 else:
                     variables.camera_object.rotation_euler.rotate_axis("X", math.radians(-10))
+            draw_snap_unsnap() 
             return {'RUNNING_MODAL'}
         
         elif event.type == 'NUMPAD_2':
@@ -186,6 +200,7 @@ class CC_OT_cam_compo_multi(bpy.types.Operator):
                     track_to_target()
                 else:
                     variables.camera_object.rotation_euler.rotate_axis("X", math.radians(10))
+            draw_snap_unsnap() 
             return {'RUNNING_MODAL'}
 
         elif event.type == 'NUMPAD_6':
@@ -193,6 +208,7 @@ class CC_OT_cam_compo_multi(bpy.types.Operator):
                 variables.target_object.rotation_euler.z += math.radians(1)
             elif event.value == 'RELEASE' and event.ctrl:
                 variables.target_object.rotation_euler.z += math.radians(15)
+            draw_snap_unsnap() 
             return {'RUNNING_MODAL'}
         
         elif event.type == 'NUMPAD_4':
@@ -200,6 +216,7 @@ class CC_OT_cam_compo_multi(bpy.types.Operator):
                 variables.target_object.rotation_euler.z += math.radians(-1)
             elif event.value == 'RELEASE' and event.ctrl:
                 variables.target_object.rotation_euler.z += math.radians(-15)
+            draw_snap_unsnap() 
             return {'RUNNING_MODAL'}
         
         elif event.type == 'NUMPAD_7':
@@ -207,6 +224,7 @@ class CC_OT_cam_compo_multi(bpy.types.Operator):
                 variables.camera_object.rotation_euler.rotate_axis("Z", math.radians(-1))
             elif event.value == 'RELEASE' and event.ctrl:
                 variables.camera_object.rotation_euler.rotate_axis("Z", math.radians(-15))
+            draw_snap_unsnap() 
             return {'RUNNING_MODAL'}
         
         elif event.type == 'NUMPAD_9':
@@ -214,6 +232,7 @@ class CC_OT_cam_compo_multi(bpy.types.Operator):
                 variables.camera_object.rotation_euler.rotate_axis("Z", math.radians(1))
             elif event.value == 'RELEASE' and event.ctrl:
                 variables.camera_object.rotation_euler.rotate_axis("Z", math.radians(15))
+            draw_snap_unsnap() 
             return {'RUNNING_MODAL'}
         
         elif event.type == 'NUMPAD_1':
@@ -221,6 +240,7 @@ class CC_OT_cam_compo_multi(bpy.types.Operator):
                 variables.camera_object.location += (variables.camera_object.matrix_basis.to_quaternion() @ Vector((-variables.cam_target_distance_factor, 0, 0)))
             elif event.value == 'RELEASE' and event.ctrl:
                 variables.camera_object.location += (variables.camera_object.matrix_basis.to_quaternion() @ Vector((-5 * variables.cam_target_distance_factor, 0, 0)))
+            draw_snap_unsnap() 
             return {'RUNNING_MODAL'}
         
         elif event.type == 'NUMPAD_3':
@@ -228,6 +248,7 @@ class CC_OT_cam_compo_multi(bpy.types.Operator):
                 variables.camera_object.location += (variables.camera_object.matrix_basis.to_quaternion() @ Vector((variables.cam_target_distance_factor, 0, 0)))
             elif event.value == 'RELEASE' and event.ctrl:
                 variables.camera_object.location += (variables.camera_object.matrix_basis.to_quaternion() @ Vector((5 * variables.cam_target_distance_factor, 0, 0)))
+            draw_snap_unsnap() 
             return {'RUNNING_MODAL'}
         
         elif event.type == 'NUMPAD_PLUS':
@@ -296,6 +317,7 @@ class CC_OT_cam_compo_multi(bpy.types.Operator):
                     variables.camera_aperture = variables.camera_object.data.dof.aperture_fstop
 
             draw_camera_info()
+            draw_snap_unsnap() 
             return {'RUNNING_MODAL'}
         
         elif event.type == 'NUMPAD_MINUS':
@@ -365,6 +387,7 @@ class CC_OT_cam_compo_multi(bpy.types.Operator):
                     variables.camera_aperture = variables.camera_object.data.dof.aperture_fstop
             
             draw_camera_info()
+            draw_snap_unsnap() 
             return {'RUNNING_MODAL'}
         
         elif event.type in {'UP_ARROW','DOWN_ARROW','LEFT_ARROW','RIGHT_ARROW'} and event.value == 'RELEASE':
@@ -396,15 +419,16 @@ class CC_OT_cam_compo_multi(bpy.types.Operator):
             elif event.type == 'UP_ARROW':
                 variables.target_object.rotation_euler[2] = math.radians(180)   
 
+            draw_snap_unsnap() 
             return {'RUNNING_MODAL'}
         
         elif event.type in {'NUMPAD_ENTER','RET'} and event.value == 'RELEASE':
-            if can_snapshot():
+            if snapshot_detect.can_snapshot():
                 bpy.ops.view3d.restore_snapshot()
             return {'RUNNING_MODAL'}
         
         # 鼠标移动直接 回到 modal
-        elif event.type not in {'MOUSEMOVE','ESC','WHEELUPMOUSE','WHEELDOWNMOUSE','HOME','LEFTMOUSE'}:
+        elif event.type not in {'MOUSEMOVE','ESC','WHEELUPMOUSE','WHEELDOWNMOUSE','HOME','LEFTMOUSE','N'}:
             return {'RUNNING_MODAL'}
                 
         elif event.type == 'ESC':
@@ -483,7 +507,7 @@ class CC_OT_cam_compo_single(bpy.types.Operator):
         draw_lens_dist_aper()
         draw_unlock_lock()
         draw_camera_info()
-        draw_snap_unsnap()
+        bpy.app.timers.register(draw_snap_unsnap,first_interval=0.01)
         
 
         context.window_manager.modal_handler_add(self)
@@ -507,6 +531,7 @@ class CC_OT_cam_compo_single(bpy.types.Operator):
                 variables.camera_object.location += variables.camera_object.matrix_basis.to_quaternion() @ Vector((0, 0, -0.1))
             elif event.value == 'RELEASE' and event.ctrl:
                 variables.camera_object.location += variables.camera_object.matrix_basis.to_quaternion() @ Vector((0, 0, -1))
+            draw_snap_unsnap()
             return {'RUNNING_MODAL'}
         
 
@@ -515,6 +540,7 @@ class CC_OT_cam_compo_single(bpy.types.Operator):
                 variables.camera_object.location += variables.camera_object.matrix_basis.to_quaternion() @ Vector((0, 0, 0.1))
             elif event.value == 'RELEASE' and event.ctrl:
                 variables.camera_object.location += variables.camera_object.matrix_basis.to_quaternion() @ Vector((0, 0, 1))
+            draw_snap_unsnap()
             return {'RUNNING_MODAL'}
         
         elif event.type == 'NUMPAD_8':
@@ -528,6 +554,7 @@ class CC_OT_cam_compo_single(bpy.types.Operator):
                     variables.camera_object.location += Vector((0, 0, 1))
                 else:
                     variables.camera_object.rotation_euler.rotate_axis("X", math.radians(-10))
+            draw_snap_unsnap()
             return {'RUNNING_MODAL'}
         
         
@@ -542,6 +569,7 @@ class CC_OT_cam_compo_single(bpy.types.Operator):
                     variables.camera_object.location += Vector((0, 0, -1))
                 else:
                     variables.camera_object.rotation_euler.rotate_axis("X", math.radians(10))
+            draw_snap_unsnap()
             return {'RUNNING_MODAL'}
 
 
@@ -550,6 +578,7 @@ class CC_OT_cam_compo_single(bpy.types.Operator):
                 variables.camera_object.rotation_euler.rotate(Matrix.Rotation(math.radians(1), 4, 'Z'))
             elif event.value == 'RELEASE' and event.ctrl:
                 variables.camera_object.rotation_euler.rotate(Matrix.Rotation(math.radians(15), 4, 'Z'))
+            draw_snap_unsnap()
             return {'RUNNING_MODAL'}
         
         elif event.type == 'NUMPAD_4':
@@ -557,6 +586,7 @@ class CC_OT_cam_compo_single(bpy.types.Operator):
                 variables.camera_object.rotation_euler.rotate(Matrix.Rotation(math.radians(-1), 4, 'Z'))
             elif event.value == 'RELEASE' and event.ctrl:
                 variables.camera_object.rotation_euler.rotate(Matrix.Rotation(math.radians(-15), 4, 'Z'))
+            draw_snap_unsnap()
             return {'RUNNING_MODAL'}
         
         elif event.type == 'NUMPAD_7':
@@ -564,6 +594,7 @@ class CC_OT_cam_compo_single(bpy.types.Operator):
                 variables.camera_object.rotation_euler.rotate_axis("Z", math.radians(-1))
             elif event.value == 'RELEASE' and event.ctrl:
                 variables.camera_object.rotation_euler.rotate_axis("Z", math.radians(-15))
+            draw_snap_unsnap()
             return {'RUNNING_MODAL'}
         
         elif event.type == 'NUMPAD_9':
@@ -571,6 +602,7 @@ class CC_OT_cam_compo_single(bpy.types.Operator):
                 variables.camera_object.rotation_euler.rotate_axis("Z", math.radians(1))
             elif event.value == 'RELEASE' and event.ctrl:
                 variables.camera_object.rotation_euler.rotate_axis("Z", math.radians(15))
+            draw_snap_unsnap()
             return {'RUNNING_MODAL'}
         
         elif event.type == 'NUMPAD_1':
@@ -578,6 +610,7 @@ class CC_OT_cam_compo_single(bpy.types.Operator):
                 variables.camera_object.location += (variables.camera_object.matrix_basis.to_quaternion() @ Vector((-0.1, 0, 0)))
             elif event.value == 'RELEASE' and event.ctrl:
                 variables.camera_object.location += (variables.camera_object.matrix_basis.to_quaternion() @ Vector((-0.5, 0, 0)))
+            draw_snap_unsnap()
             return {'RUNNING_MODAL'}
         
         elif event.type == 'NUMPAD_3':
@@ -585,6 +618,7 @@ class CC_OT_cam_compo_single(bpy.types.Operator):
                 variables.camera_object.location += (variables.camera_object.matrix_basis.to_quaternion() @ Vector((0.1, 0, 0)))
             elif event.value == 'RELEASE' and event.ctrl:
                 variables.camera_object.location += (variables.camera_object.matrix_basis.to_quaternion() @ Vector((0.5, 0, 0)))
+            draw_snap_unsnap()
             return {'RUNNING_MODAL'}
         
         elif event.type == 'NUMPAD_PLUS':
@@ -653,6 +687,7 @@ class CC_OT_cam_compo_single(bpy.types.Operator):
                     variables.camera_aperture = variables.camera_object.data.dof.aperture_fstop
 
             draw_camera_info()
+            draw_snap_unsnap()
             return {'RUNNING_MODAL'}
         
         elif event.type == 'NUMPAD_MINUS':
@@ -722,15 +757,16 @@ class CC_OT_cam_compo_single(bpy.types.Operator):
                     variables.camera_aperture = variables.camera_object.data.dof.aperture_fstop
             
             draw_camera_info()
+            draw_snap_unsnap()
             return {'RUNNING_MODAL'}
         
         elif event.type in {'NUMPAD_ENTER','RET'} and event.value == 'RELEASE':
-            if can_snapshot():
+            if snapshot_detect.can_snapshot():
                 bpy.ops.view3d.restore_snapshot()
             return {'RUNNING_MODAL'}
                 
         # 鼠标移动直接 回到 modal
-        elif event.type not in {'MOUSEMOVE','ESC','WHEELUPMOUSE','WHEELDOWNMOUSE','HOME','LEFTMOUSE'}:
+        elif event.type not in {'MOUSEMOVE','ESC','WHEELUPMOUSE','WHEELDOWNMOUSE','HOME','LEFTMOUSE','N'}:
             return {'RUNNING_MODAL'}
                 
         elif event.type == 'ESC':

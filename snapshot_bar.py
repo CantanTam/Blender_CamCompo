@@ -31,10 +31,10 @@ class DrawCameraSnapshot:
     def draw(self):
         self.vertices = {
             "pos": [
-                (bpy.context.region.width - 80 - 35, 15),
-                (bpy.context.region.width - 35, 15),
-                (bpy.context.region.width - 35, 60 + 15),
-                (bpy.context.region.width - 80 - 35, 60 + 15)
+                ((bpy.context.region.width - 80) * 0.5, 15),
+                ((bpy.context.region.width + 80) * 0.5, 15),
+                ((bpy.context.region.width + 80) * 0.5, 60 + 15),
+                ((bpy.context.region.width - 80) * 0.5, 60 + 15)
             ],
             "texCoord": [(0, 0), (1, 0), (1, 1), (0, 1)],
         }

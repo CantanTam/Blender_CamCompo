@@ -1,15 +1,14 @@
 import bpy,gpu,os
 from gpu_extras.batch import batch_for_shader
 from . import variables
-
-# 全局控制变量
+from . import snapshot_detect# 全局控制变量
 snap_unsnap_statu = None
 
 
 
 class DrawSnapUnsnap:
     def __init__(self,):
-        if variables.snapshot_statu == True :
+        if not snapshot_detect.can_snapshot() :
             self.image_path = 'ICON_SNAP.png'
         else:
             self.image_path = 'ICON_UNSNAP.png'
