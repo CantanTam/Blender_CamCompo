@@ -77,6 +77,8 @@ class CC_OT_cam_compo_invoke(bpy.types.Operator):
             variables.target_object = context.active_object
             variables.target_object.name = variables.camera_object.name + "_TARGET"
 
+            bpy.data.objects[variables.target_object.name].hide_set(True)
+
             bpy.ops.mesh.primitive_cube_add(size=variables.target_object_size, align='WORLD', location=variables.target_location)
 
             variables.camera_object.rotation_euler[0] = math.radians(90)

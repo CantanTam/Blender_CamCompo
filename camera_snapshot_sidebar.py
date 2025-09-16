@@ -69,10 +69,10 @@ class CC_OT_prev_snapshot(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
-        return len(context.scene.camera.camera_snapshots) > 0 and context.scene.camera.camera_snapshots_index > 0
+        return len(context.scene.camera.camera_snapshots) > 0 and context.scene.camera.camera_snapshots_index < len(context.scene.camera.camera_snapshots) - 1 
 
     def execute(self, context):
-        context.scene.camera.camera_snapshots_index -= 1
+        context.scene.camera.camera_snapshots_index += 1
         bpy.ops.view3d.goto_snapshot()
         return {'FINISHED'}
     
@@ -84,12 +84,13 @@ class CC_OT_next_snapshot(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
-        return len(context.scene.camera.camera_snapshots) > 0 and context.scene.camera.camera_snapshots_index < len(context.scene.camera.camera_snapshots) - 1 
+        return len(context.scene.camera.camera_snapshots) > 0 and context.scene.camera.camera_snapshots_index > 0
 
     def execute(self, context):
-        context.scene.camera.camera_snapshots_index += 1
+        context.scene.camera.camera_snapshots_index -= 1
         bpy.ops.view3d.goto_snapshot()
         return {'FINISHED'}
+
     
 class CC_OT_restore_snapshot(bpy.types.Operator):
     bl_idname = "view3d.restore_snapshot"
@@ -142,9 +143,10 @@ class CC_OT_restore_snapshot(bpy.types.Operator):
                     )[-1],
                 first_interval=0.08 * 34
                 )
-            
-            bpy.app.timers.register(draw_snap_unsnap, first_interval=0.08 * 25 )
 
+            bpy.app.timers.register(draw_snap_unsnap, first_interval=0.08 * 25 )
+        
+        context.scene.camera.camera_snapshots_index = len(context.scene.camera.camera_snapshots) - 1
         return {'FINISHED'}
     
 class CC_OT_remove_snapshot(bpy.types.Operator):

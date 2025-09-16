@@ -15,8 +15,13 @@ def can_snapshot():
             for snap in snap_list
         }
 
-        current_snap = str(round(camera.data.lens, 2)) + str(round(camera.data.dof.focus_distance, 3)) + str(round(camera.data.dof.aperture_fstop, 2)) + ''.join(str(round(v, 4)) for row in camera.matrix_world for v in row)
-
+        current_snap = (
+            str(round(camera.data.lens, 2)) + 
+            str(round(camera.data.dof.focus_distance, 3)) + 
+            str(round(camera.data.dof.aperture_fstop, 2)) + 
+            ''.join(str(round(v, 4)) for row in camera.matrix_world for v in row)
+        )
+        
         if current_snap not in snap_set:
             return True
 
