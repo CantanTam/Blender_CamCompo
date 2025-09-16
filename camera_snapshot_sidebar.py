@@ -59,6 +59,21 @@ class CC_PT_snapshot_sidebar(bpy.types.Panel):
         col.separator()
         col.operator("view3d.cam_compo_invoke", text="", icon="CON_CAMERASOLVER")
 
+        #layout.separator()
+
+
+        layout.template_list(
+            "CC_UL_camera_snapshots",    # 自定义 UIList
+            "",
+            camera,                          # 数据源对象
+            "camera_snapshots",           # CollectionProperty 名
+            camera,                          # active object
+            "camera_snapshots_index",     # 活动索引属性
+            rows=8,                        # 显示行数
+            sort_reverse=True,
+            sort_lock=True,
+        )
+
 
 
 
