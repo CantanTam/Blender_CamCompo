@@ -23,13 +23,12 @@ class CC_PT_snapshot_sidebar(bpy.types.Panel):
         if camera is None or context.mode != 'OBJECT':
             return
         
-        layout = self.layout
+        panel = self.layout
 
-        row = layout.row(align=True)
+        row2 = panel.row(align=True)
+        col1 = row2.column()
 
-        col = row.column(align=True)
-
-        col.template_list(
+        col1.template_list(
             "CC_UL_camera_snapshots",    # 自定义 UIList
             "",
             camera,                          # 数据源对象
@@ -44,25 +43,39 @@ class CC_PT_snapshot_sidebar(bpy.types.Panel):
         if camera.camera_snapshots:
             index = camera.camera_snapshots_index
             snapshot = camera.camera_snapshots[index]
-            col.separator()
-            col.prop(snapshot, "name", text="",icon='GREASEPENCIL')
-        
-        row.separator()
+            col1.prop(snapshot, "name", text="",icon='GREASEPENCIL')
 
-        col = row.column(align=True)
-        col.operator("view3d.restore_snapshot", text="", icon="ADD")
-        col.operator("view3d.remove_snapshot", text="", icon="REMOVE")
-        col.separator()
-        col.operator("view3d.prev_snapshot", text="", icon="TRIA_UP")
+        row2.separator()
+
+        col2 = row2.column(align=True)
+        col2.operator("view3d.restore_snapshot", text="", icon="ADD")
+        col2.operator("view3d.remove_snapshot", text="", icon="REMOVE")
+        col2.separator()
+        col2.operator("view3d.prev_snapshot", text="", icon="TRIA_UP")
         #col.operator("view3d.goto_snapshot", text="", icon="LOOP_BACK")
-        col.operator("view3d.next_snapshot", text="", icon="TRIA_DOWN")
-        col.separator()
-        col.operator("view3d.cam_compo_invoke", text="", icon="CON_CAMERASOLVER")
-
-        #layout.separator()
+        col2.operator("view3d.next_snapshot", text="", icon="TRIA_DOWN")
+        col2.separator()
+        col2.operator("view3d.cam_compo_invoke", text="", icon="CON_CAMERASOLVER")
 
 
-        layout.template_list(
+class CC_PT_cam_switch_sidebar(bpy.types.Panel):
+    bl_label = "相机切换"
+    bl_idname = "cc.cam_switch_sidebar"
+    bl_space_type = 'VIEW_3D'
+    bl_region_type = 'UI'
+    bl_category = "CamCompo"
+
+    def draw(self, context):
+        camera = context.scene.camera
+        if camera is None or context.mode != 'OBJECT':
+            return
+        
+        panel = self.layout
+
+        row2 = panel.row(align=True)
+        col1 = row2.column()
+
+        col1.template_list(
             "CC_UL_camera_snapshots",    # 自定义 UIList
             "",
             camera,                          # 数据源对象
@@ -73,6 +86,28 @@ class CC_PT_snapshot_sidebar(bpy.types.Panel):
             sort_reverse=True,
             sort_lock=True,
         )
+
+        if camera.camera_snapshots:
+            index = camera.camera_snapshots_index
+            snapshot = camera.camera_snapshots[index]
+            col1.prop(snapshot, "name", text="",icon='GREASEPENCIL')
+
+        row2.separator()
+
+        col2 = row2.column(align=True)
+        col2.operator("view3d.restore_snapshot", text="", icon="ADD")
+        col2.operator("view3d.remove_snapshot", text="", icon="REMOVE")
+        col2.separator()
+        col2.operator("view3d.prev_snapshot", text="", icon="TRIA_UP")
+        #col.operator("view3d.goto_snapshot", text="", icon="LOOP_BACK")
+        col2.operator("view3d.next_snapshot", text="", icon="TRIA_DOWN")
+        col2.separator()
+        col2.operator("view3d.cam_compo_invoke", text="", icon="CON_CAMERASOLVER")
+
+
+
+
+
 
 
 
@@ -233,6 +268,7 @@ def goto_snapshot():
     if variables.last_click_time - variables.prev_click_time < 0.5:
         bpy.ops.view3d.goto_snapshot()        
 
+# 判定是不是处于相机视图
 def is_camera_view():
     for area in bpy.context.screen.areas:
         if area.type != 'VIEW_3D':

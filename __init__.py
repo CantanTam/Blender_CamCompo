@@ -30,6 +30,7 @@ from .camera_snapshot_list import CameraSnapshot
 from .camera_snapshot_sidebar import (
     CC_UL_camera_snapshots,
     CC_PT_snapshot_sidebar,
+    CC_PT_cam_switch_sidebar,
     CC_OT_prev_snapshot,
     CC_OT_next_snapshot,
     CC_OT_restore_snapshot,
@@ -60,6 +61,7 @@ def register():
     bpy.types.Object.camera_snapshots_index = IntProperty(default=0,update=click_index_action)
     bpy.utils.register_class(CC_UL_camera_snapshots)
     bpy.utils.register_class(CC_PT_snapshot_sidebar)
+    bpy.utils.register_class(CC_PT_cam_switch_sidebar)
     bpy.utils.register_class(CC_OT_prev_snapshot)
     bpy.utils.register_class(CC_OT_next_snapshot)
     bpy.utils.register_class(CC_OT_restore_snapshot)
@@ -79,6 +81,7 @@ def unregister():
     bpy.utils.unregister_class(CC_OT_restore_snapshot)
     bpy.utils.unregister_class(CC_OT_next_snapshot)
     bpy.utils.unregister_class(CC_OT_prev_snapshot)
+    bpy.utils.unregister_class(CC_PT_cam_switch_sidebar)
     bpy.utils.unregister_class(CC_PT_snapshot_sidebar)
     bpy.utils.unregister_class(CC_UL_camera_snapshots)
     del bpy.types.Object.camera_snapshots_index
