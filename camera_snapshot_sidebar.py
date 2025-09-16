@@ -201,20 +201,18 @@ class CC_OT_goto_snapshot(bpy.types.Operator):
     
 
 
-prev_click_time = 0
-last_click_time = 0
+
 
 
 def click_index_action(self, context):
-    global is_clicked,prev_click_time,last_click_time
-    prev_click_time = last_click_time
+    variables.prev_click_time = variables.last_click_time
     now = datetime.now()
-    last_click_time = now.hour * 3600 + now.minute * 60 + now.second + now.microsecond / 1_000_000
+    variables.last_click_time = now.hour * 3600 + now.minute * 60 + now.second + now.microsecond / 1_000_000
     bpy.app.timers.register(goto_snapshot, first_interval=0.51)
 
 
 def goto_snapshot():
-    if last_click_time - prev_click_time < 0.5:
+    if variables.last_click_time - variables.prev_click_time < 0.5:
         bpy.ops.view3d.goto_snapshot()        
 
 def is_camera_view():

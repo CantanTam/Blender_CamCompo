@@ -1,5 +1,6 @@
 import bpy,math
 from mathutils import Vector,Matrix
+from datetime import datetime
 from . import variables
 
 from .background import draw_background
@@ -415,7 +416,13 @@ class CC_OT_cam_compo_multi(bpy.types.Operator):
         
         elif event.type in {'NUMPAD_ENTER','RET'} and event.value == 'RELEASE':
             if snapshot_detect.can_snapshot():
-                bpy.ops.view3d.restore_snapshot()
+                variables.prev_click_time = variables.last_click_time
+                now = datetime.now()
+                variables.last_click_time = now.hour * 3600 + now.minute * 60 + now.second + now.microsecond / 1_000_000
+                bpy.app.timers.register(
+                    lambda: bpy.ops.view3d.restore_snapshot() if (variables.last_click_time - variables.prev_click_time) < 0.5 else None,
+                    first_interval=0.51 )
+                #bpy.ops.view3d.restore_snapshot()
             return {'RUNNING_MODAL'}
         
         # 鼠标移动直接 回到 modal
@@ -753,7 +760,13 @@ class CC_OT_cam_compo_single(bpy.types.Operator):
         
         elif event.type in {'NUMPAD_ENTER','RET'} and event.value == 'RELEASE':
             if snapshot_detect.can_snapshot():
-                bpy.ops.view3d.restore_snapshot()
+                variables.prev_click_time = variables.last_click_time
+                now = datetime.now()
+                variables.last_click_time = now.hour * 3600 + now.minute * 60 + now.second + now.microsecond / 1_000_000
+                bpy.app.timers.register(
+                    lambda: bpy.ops.view3d.restore_snapshot() if (variables.last_click_time - variables.prev_click_time) < 0.5 else None,
+                    first_interval=0.51 )
+                #bpy.ops.view3d.restore_snapshot()
             return {'RUNNING_MODAL'}
                 
         # 鼠标移动直接 回到 modal

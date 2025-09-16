@@ -31,3 +31,7 @@ test_matrix = None
 
 snapshot_statu = False
 
+#检测两次按钮时间间隔
+prev_click_time = 0
+last_click_time = 0
+
