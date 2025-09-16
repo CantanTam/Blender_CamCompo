@@ -31,7 +31,7 @@ class CC_OT_cam_compo_invoke(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
-        return len(bpy.context.selected_objects) > 0 and bpy.context.selected_objects[-1].type == 'CAMERA' and bpy.context.mode == 'OBJECT' and not is_camera_view()
+        return len(bpy.context.selected_objects) > 0 and bpy.context.active_object.type == 'CAMERA' and bpy.context.mode == 'OBJECT' and not is_camera_view()
 
     def execute(self, context):
         variables.camera_object = context.active_object
