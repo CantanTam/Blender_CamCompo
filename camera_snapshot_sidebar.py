@@ -38,6 +38,7 @@ class CC_PT_snapshot_sidebar(bpy.types.Panel):
             "camera_snapshots_index",     # 活动索引属性
             rows=8,                        # 显示行数
             sort_reverse=True,
+            sort_lock=True,
         )
 
         if camera.camera_snapshots:
