@@ -58,7 +58,13 @@ class CC_PT_snapshot_sidebar(bpy.types.Panel):
 
 class CC_UL_camera_items(bpy.types.UIList): 
     def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index): 
-        layout.label(text=item.camera_item.name, icon='CAMERA_DATA')
+        scene = context.scene
+        cam_obj = item.camera_item
+
+        if cam_obj:
+            # 如果这一行的相机就是场景当前激活的 camera → 用 OUTLINER_OB_CAMERA 图标
+            icon_id = 'OUTLINER_OB_CAMERA' if scene.camera == cam_obj else 'CAMERA_DATA'
+            layout.label(text=cam_obj.name, icon=icon_id)
 
 
 class CC_PT_cam_switch_sidebar(bpy.types.Panel):
