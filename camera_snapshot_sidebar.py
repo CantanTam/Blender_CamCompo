@@ -92,8 +92,8 @@ class CC_PT_cam_switch_sidebar(bpy.types.Panel):
             scene,                          # active object
             "camera_items_index",     # 活动索引属性
             rows=8,                        # 显示行数
-            sort_reverse=True,
-            sort_lock=True,
+            #sort_reverse=True,
+            #sort_lock=True,
         )
 
         if scene.camera:
