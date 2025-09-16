@@ -19,17 +19,8 @@ from .cam_track_target import track_to_target
 
 from . import snapshot_detect
 
+from .camera_snapshot_sidebar import is_camera_view
 
-def is_camera_view():
-    for area in bpy.context.screen.areas:
-        if area.type != 'VIEW_3D':
-            continue
-        for space in area.spaces:
-            if space.type != 'VIEW_3D':
-                continue
-            if space.region_3d.view_perspective == 'CAMERA':
-                return True
-    return False
 
 class CC_OT_cam_compo_invoke(bpy.types.Operator):
     bl_idname = "view3d.cam_compo_invoke"

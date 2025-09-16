@@ -1,4 +1,4 @@
-import bpy
+import bpy,os
 from datetime import datetime
 from . import snapshot_bar
 from . import snapshot_bar_invoke
@@ -28,6 +28,7 @@ class CC_PT_snapshot_sidebar(bpy.types.Panel):
         row = layout.row(align=True)
 
         col = row.column(align=True)
+
         col.template_list(
             "CC_UL_camera_snapshots",    # 自定义 UIList
             "",
@@ -36,6 +37,7 @@ class CC_PT_snapshot_sidebar(bpy.types.Panel):
             camera,                          # active object
             "camera_snapshots_index",     # 活动索引属性
             rows=8,                        # 显示行数
+            sort_reverse=True,
         )
 
         if camera.camera_snapshots:
@@ -50,14 +52,12 @@ class CC_PT_snapshot_sidebar(bpy.types.Panel):
         col.operator("view3d.restore_snapshot", text="", icon="ADD")
         col.operator("view3d.remove_snapshot", text="", icon="REMOVE")
         col.separator()
-        if len(context.selected_objects) > 0 and context.selected_objects[-1].type == 'CAMERA':
-            col.operator("view3d.cam_compo_invoke", text="", icon="CON_CAMERASOLVER")
-        else:
-            col.operator("view3d.liveview_snapshot", text="", icon="HIDE_OFF")
-        col.operator("view3d.goto_snapshot", text="", icon="LOOP_BACK")
-        col.separator()
         col.operator("view3d.prev_snapshot", text="", icon="TRIA_UP")
+        #col.operator("view3d.goto_snapshot", text="", icon="LOOP_BACK")
         col.operator("view3d.next_snapshot", text="", icon="TRIA_DOWN")
+        col.separator()
+        col.operator("view3d.cam_compo_invoke", text="", icon="CON_CAMERASOLVER")
+
 
 
 
@@ -167,19 +167,6 @@ class CC_OT_remove_snapshot(bpy.types.Operator):
             camera.camera_snapshots_index -= 1
         return {'FINISHED'}
     
-class CC_OT_liveview_snapshot(bpy.types.Operator):
-    bl_idname = "view3d.liveview_snapshot"
-    bl_label = "实时预览快照"
-    bl_description = "实时预览快照"
-    bl_options = {'REGISTER', 'UNDO'}
-
-    @classmethod
-    def poll(cls, context):
-        return len(context.scene.camera.camera_snapshots) > 0
-
-    def execute(self, context):
-        return {'FINISHED'}
-    
 class CC_OT_goto_snapshot(bpy.types.Operator):
     bl_idname = "view3d.goto_snapshot"
     bl_label = "跳到快照"
@@ -206,3 +193,39 @@ class CC_OT_goto_snapshot(bpy.types.Operator):
             draw_camera_info()
 
         return {'FINISHED'}
+    
+
+
+prev_click_time = 0
+last_click_time = 0
+
+
+def click_index_action(self, context):
+    global is_clicked,prev_click_time,last_click_time
+    prev_click_time = last_click_time
+    now = datetime.now()
+    last_click_time = now.hour * 3600 + now.minute * 60 + now.second + now.microsecond / 1_000_000
+
+    bpy.app.timers.register(goto_snapshot, first_interval=0.51)
+
+
+def goto_snapshot():
+    if last_click_time - prev_click_time < 0.5:
+        bpy.ops.view3d.goto_snapshot()
+        #if is_camera_view():
+        bpy.ops.view3d.view_camera('INVOKE_DEFAULT')
+        
+
+def is_camera_view():
+    for area in bpy.context.screen.areas:
+        if area.type != 'VIEW_3D':
+            continue
+        for space in area.spaces:
+            if space.type != 'VIEW_3D':
+                continue
+            if space.region_3d.view_perspective == 'CAMERA':
+                return True
+    return False
+    
+    
+
