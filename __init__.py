@@ -1,7 +1,7 @@
 import bpy
 import os
 from bpy.props import FloatProperty, FloatVectorProperty, CollectionProperty, IntProperty
-from .camera_snapshot_sidebar import click_index_action,update_camera_list
+from .camera_snapshot_sidebar import click_snapshot_action,click_camera_action
 
 bl_info = {
     "name": "CamCompo",
@@ -35,6 +35,9 @@ from .camera_snapshot_sidebar import (
     CC_PT_snapshot_sidebar,
     CC_UL_camera_items,
     CC_PT_cam_switch_sidebar,
+    CC_OT_add_camera,
+    CC_OT_delete_camera,
+    CC_OT_update_camera,
     CC_OT_prev_snapshot,
     CC_OT_next_snapshot,
     CC_OT_restore_snapshot,
@@ -63,15 +66,17 @@ def register():
     bpy.utils.register_class(CC_OT_cam_compo_single)
     bpy.utils.register_class(CameraSnapshot)
     bpy.types.Object.camera_snapshots = CollectionProperty(type=CameraSnapshot)
-    bpy.types.Object.camera_snapshots_index = IntProperty(default=0,update=click_index_action)
+    bpy.types.Object.camera_snapshots_index = IntProperty(default=0,update=click_snapshot_action)
     bpy.utils.register_class(CameraItem)
     bpy.types.Scene.camera_items = bpy.props.CollectionProperty(type=CameraItem)
-    bpy.types.Scene.camera_items_index = bpy.props.IntProperty(default=0)
-    bpy.app.timers.register(lambda: update_camera_list() or None, first_interval=1)
+    bpy.types.Scene.camera_items_index = bpy.props.IntProperty(default=0,update=click_camera_action)
     bpy.utils.register_class(CC_UL_camera_snapshots)
     bpy.utils.register_class(CC_PT_snapshot_sidebar)
     bpy.utils.register_class(CC_UL_camera_items)
     bpy.utils.register_class(CC_PT_cam_switch_sidebar)
+    bpy.utils.register_class(CC_OT_add_camera)
+    bpy.utils.register_class(CC_OT_delete_camera)
+    bpy.utils.register_class(CC_OT_update_camera)
     bpy.utils.register_class(CC_OT_prev_snapshot)
     bpy.utils.register_class(CC_OT_next_snapshot)
     bpy.utils.register_class(CC_OT_restore_snapshot)
@@ -91,11 +96,13 @@ def unregister():
     bpy.utils.unregister_class(CC_OT_restore_snapshot)
     bpy.utils.unregister_class(CC_OT_next_snapshot)
     bpy.utils.unregister_class(CC_OT_prev_snapshot)
+    bpy.utils.unregister_class(CC_OT_update_camera)
+    bpy.utils.unregister_class(CC_OT_delete_camera)
+    bpy.utils.unregister_class(CC_OT_add_camera)
     bpy.utils.unregister_class(CC_PT_cam_switch_sidebar)
     bpy.utils.unregister_class(CC_UL_camera_items)
     bpy.utils.unregister_class(CC_PT_snapshot_sidebar)
     bpy.utils.unregister_class(CC_UL_camera_snapshots)
-    pass
     del bpy.types.Scene.camera_items_index
     del bpy.types.Scene.camera_items
     bpy.utils.unregister_class(CameraItem)

@@ -26,7 +26,7 @@ class CC_PT_snapshot_sidebar(bpy.types.Panel):
         panel = self.layout
 
         row2 = panel.row(align=True)
-        col1 = row2.column(align=True)
+        col1 = row2.column()
 
         col1.template_list(
             "CC_UL_camera_snapshots",    # 自定义 UIList
@@ -35,7 +35,7 @@ class CC_PT_snapshot_sidebar(bpy.types.Panel):
             "camera_snapshots",           # CollectionProperty 名
             camera,                          # active object
             "camera_snapshots_index",     # 活动索引属性
-            rows=8,                        # 显示行数
+            rows=8,
             sort_reverse=True,
             sort_lock=True,
         )
@@ -56,9 +56,10 @@ class CC_PT_snapshot_sidebar(bpy.types.Panel):
         col2.separator()
         col2.operator("view3d.cam_compo_invoke", text="", icon="CON_CAMERASOLVER")
 
-class CC_UL_camera_items(bpy.types.UIList):    
-    def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
-        layout.label(text=item.camera_item.name, icon='BOOKMARKS')
+class CC_UL_camera_items(bpy.types.UIList): 
+    def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index): 
+        layout.label(text=item.camera_item.name, icon='CAMERA_DATA')
+
 
 class CC_PT_cam_switch_sidebar(bpy.types.Panel):
     bl_label = "相机切换"
@@ -69,7 +70,7 @@ class CC_PT_cam_switch_sidebar(bpy.types.Panel):
 
     def draw(self, context):
         scene = context.scene
-        if len(scene.camera_items) == 0 or context.mode != 'OBJECT':
+        if context.mode != 'OBJECT':
             return
         
         panel = self.layout
@@ -89,21 +90,67 @@ class CC_PT_cam_switch_sidebar(bpy.types.Panel):
             sort_lock=True,
         )
 
-        if scene.camera_items:
-            index = scene.camera_items_index
-            cameraitem = scene.camera_items[index]
-            col1.prop(cameraitem.camera_item, "name", text="",icon='GREASEPENCIL')
+        if scene.camera:
+            if scene.camera in {i.camera_item for i in scene.camera_items}:
+                index = scene.camera_items_index
+                cameraitem = scene.camera_items[index]
+                if cameraitem.camera_item is not None:
+                    col1.prop(cameraitem.camera_item, "name", text="",icon='GREASEPENCIL')
 
         row2.separator()
 
         col2 = row2.column(align=True)
-        col2.operator("object.camera_add", text="", icon="ADD")
-        col2.operator("view3d.remove_snapshot", text="", icon="REMOVE")
+        col2.operator("view3d.add_camera", text="", icon="ADD")
+        col2.operator("view3d.delete_camera", text="", icon="TRASH")
         col2.separator()
-        col2.operator("view3d.prev_snapshot", text="", icon="TRIA_UP")
-        col2.operator("view3d.next_snapshot", text="", icon="TRIA_DOWN")
-        col2.separator()
-        col2.operator("view3d.cam_compo_invoke", text="", icon="CON_CAMERASOLVER")
+        col2.operator("view3d.update_camera", text="", icon="FILE_REFRESH")
+
+class CC_OT_add_camera(bpy.types.Operator):
+    bl_idname = "view3d.add_camera"
+    bl_label = "添加摄像机"
+    bl_description = "添加摄像机"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    @classmethod
+    def poll(cls, context):
+        return not variables.camcompo_statu
+
+    def execute(self, context):
+        bpy.ops.object.camera_add()
+        update_camera_list()
+        return {'FINISHED'}
+    
+class CC_OT_delete_camera(bpy.types.Operator):
+    bl_idname = "view3d.delete_camera"
+    bl_label = "删除摄像机"
+    bl_description = "当摄像机数量大于1时删除选中摄像机"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    @classmethod
+    def poll(cls, context):
+        return context.scene.camera_items[context.scene.camera_items_index].camera_item \
+            and len({i for i in bpy.data.objects if i.type == 'CAMERA'}) > 1 \
+            and not variables.camcompo_statu
+
+    def execute(self, context):
+        delete_camera = context.scene.camera_items[context.scene.camera_items_index].camera_item
+        bpy.data.objects.remove(delete_camera, do_unlink=True)
+        update_camera_list()
+        return {'FINISHED'}
+    
+class CC_OT_update_camera(bpy.types.Operator):
+    bl_idname = "view3d.update_camera"
+    bl_label = "刷新摄像机列表"
+    bl_description = "刷新摄像机列表"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    @classmethod
+    def poll(cls, context):
+        return not variables.camcompo_statu
+
+    def execute(self, context):
+        update_camera_list()
+        return {'FINISHED'}
 
 
 
@@ -254,7 +301,7 @@ class CC_OT_goto_snapshot(bpy.types.Operator):
         return {'FINISHED'}
 
 
-def click_index_action(self, context):
+def click_snapshot_action(self, context):
     variables.prev_click_time = variables.last_click_time
     now = datetime.now()
     variables.last_click_time = now.hour * 3600 + now.minute * 60 + now.second + now.microsecond / 1_000_000
@@ -286,3 +333,14 @@ def update_camera_list():
             new_camera = scene.camera_items.add()
             new_camera.camera_item = obj
 
+
+def click_camera_action(self, context):
+    if not variables.camcompo_statu:
+        variables.prev_click_time = variables.last_click_time
+        now = datetime.now()
+        variables.last_click_time = now.hour * 3600 + now.minute * 60 + now.second + now.microsecond / 1_000_000
+        bpy.app.timers.register(set_active_camera, first_interval=0.51)
+
+def set_active_camera():
+    if bpy.context.scene.camera_items[bpy.context.scene.camera_items_index].camera_item and variables.last_click_time - variables.prev_click_time < 0.5 :
+        bpy.context.scene.camera = bpy.context.scene.camera_items[bpy.context.scene.camera_items_index].camera_item
