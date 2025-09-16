@@ -1,6 +1,6 @@
 import bpy
-from bpy.types import PropertyGroup
-from bpy.props import FloatProperty, FloatVectorProperty, StringProperty, CollectionProperty, IntProperty
+from bpy.types import PropertyGroup,Object
+from bpy.props import FloatProperty, FloatVectorProperty, StringProperty, CollectionProperty, IntProperty,PointerProperty
 from mathutils import Matrix
 
 
@@ -19,3 +19,6 @@ class CameraSnapshot(PropertyGroup):
                 0.0, 0.0, 1.0, 0.0,
                 0.0, 0.0, 0.0, 1.0)
         )
+
+class CameraItem(bpy.types.PropertyGroup):
+    camera_item: PointerProperty(type=Object)

@@ -26,7 +26,7 @@ class CC_PT_snapshot_sidebar(bpy.types.Panel):
         panel = self.layout
 
         row2 = panel.row(align=True)
-        col1 = row2.column()
+        col1 = row2.column(align=True)
 
         col1.template_list(
             "CC_UL_camera_snapshots",    # 自定义 UIList
@@ -52,11 +52,13 @@ class CC_PT_snapshot_sidebar(bpy.types.Panel):
         col2.operator("view3d.remove_snapshot", text="", icon="REMOVE")
         col2.separator()
         col2.operator("view3d.prev_snapshot", text="", icon="TRIA_UP")
-        #col.operator("view3d.goto_snapshot", text="", icon="LOOP_BACK")
         col2.operator("view3d.next_snapshot", text="", icon="TRIA_DOWN")
         col2.separator()
         col2.operator("view3d.cam_compo_invoke", text="", icon="CON_CAMERASOLVER")
 
+class CC_UL_camera_items(bpy.types.UIList):    
+    def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
+        layout.label(text=item.camera_item.name, icon='BOOKMARKS')
 
 class CC_PT_cam_switch_sidebar(bpy.types.Panel):
     bl_label = "相机切换"
@@ -66,8 +68,8 @@ class CC_PT_cam_switch_sidebar(bpy.types.Panel):
     bl_category = "CamCompo"
 
     def draw(self, context):
-        camera = context.scene.camera
-        if camera is None or context.mode != 'OBJECT':
+        scene = context.scene
+        if len(scene.camera_items) == 0 or context.mode != 'OBJECT':
             return
         
         panel = self.layout
@@ -76,30 +78,29 @@ class CC_PT_cam_switch_sidebar(bpy.types.Panel):
         col1 = row2.column()
 
         col1.template_list(
-            "CC_UL_camera_snapshots",    # 自定义 UIList
+            "CC_UL_camera_items",    # 自定义 UIList
             "",
-            camera,                          # 数据源对象
-            "camera_snapshots",           # CollectionProperty 名
-            camera,                          # active object
-            "camera_snapshots_index",     # 活动索引属性
+            scene,                          # 数据源对象
+            "camera_items",           # CollectionProperty 名
+            scene,                          # active object
+            "camera_items_index",     # 活动索引属性
             rows=8,                        # 显示行数
             sort_reverse=True,
             sort_lock=True,
         )
 
-        if camera.camera_snapshots:
-            index = camera.camera_snapshots_index
-            snapshot = camera.camera_snapshots[index]
-            col1.prop(snapshot, "name", text="",icon='GREASEPENCIL')
+        if scene.camera_items:
+            index = scene.camera_items_index
+            cameraitem = scene.camera_items[index]
+            col1.prop(cameraitem.camera_item, "name", text="",icon='GREASEPENCIL')
 
         row2.separator()
 
         col2 = row2.column(align=True)
-        col2.operator("view3d.restore_snapshot", text="", icon="ADD")
+        col2.operator("object.camera_add", text="", icon="ADD")
         col2.operator("view3d.remove_snapshot", text="", icon="REMOVE")
         col2.separator()
         col2.operator("view3d.prev_snapshot", text="", icon="TRIA_UP")
-        #col.operator("view3d.goto_snapshot", text="", icon="LOOP_BACK")
         col2.operator("view3d.next_snapshot", text="", icon="TRIA_DOWN")
         col2.separator()
         col2.operator("view3d.cam_compo_invoke", text="", icon="CON_CAMERASOLVER")
@@ -251,10 +252,6 @@ class CC_OT_goto_snapshot(bpy.types.Operator):
             draw_snap_unsnap()
 
         return {'FINISHED'}
-    
-
-
-
 
 
 def click_index_action(self, context):
@@ -280,5 +277,12 @@ def is_camera_view():
                 return True
     return False
     
-    
+#更新当前场景相机列表
+def update_camera_list():
+    scene = bpy.context.scene
+    scene.camera_items.clear()
+    for obj in bpy.data.objects:
+        if obj.type == 'CAMERA':
+            new_camera = scene.camera_items.add()
+            new_camera.camera_item = obj
 
