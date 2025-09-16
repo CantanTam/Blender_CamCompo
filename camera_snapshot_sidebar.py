@@ -165,6 +165,10 @@ class CC_OT_remove_snapshot(bpy.types.Operator):
 
         if camera.camera_snapshots_index > 0:
             camera.camera_snapshots_index -= 1
+
+        if variables.camcompo_statu:
+            draw_camera_info()
+            draw_snap_unsnap()
         return {'FINISHED'}
     
 class CC_OT_goto_snapshot(bpy.types.Operator):
@@ -191,6 +195,7 @@ class CC_OT_goto_snapshot(bpy.types.Operator):
             variables.camera_distance = variables.camera_object.data.dof.focus_distance
             variables.camera_aperture = variables.camera_object.data.dof.aperture_fstop
             draw_camera_info()
+            draw_snap_unsnap()
 
         return {'FINISHED'}
     
@@ -205,16 +210,12 @@ def click_index_action(self, context):
     prev_click_time = last_click_time
     now = datetime.now()
     last_click_time = now.hour * 3600 + now.minute * 60 + now.second + now.microsecond / 1_000_000
-
     bpy.app.timers.register(goto_snapshot, first_interval=0.51)
 
 
 def goto_snapshot():
     if last_click_time - prev_click_time < 0.5:
-        bpy.ops.view3d.goto_snapshot()
-        #if is_camera_view():
-        bpy.ops.view3d.view_camera('INVOKE_DEFAULT')
-        
+        bpy.ops.view3d.goto_snapshot()        
 
 def is_camera_view():
     for area in bpy.context.screen.areas:
