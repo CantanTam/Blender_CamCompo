@@ -224,7 +224,7 @@ class CC_OT_restore_snapshot(bpy.types.Operator):
     def poll(cls, context):
         return context.scene.camera is not None and snapshot_detect.can_snapshot()
 
-    def execute(self, context):
+    def execute(self, context):        
         bpy.context.scene.camera.camera_snapshots.add()
 
         snapshot_name ='snapshot_' + datetime.now().strftime("%m%d%H%M%S")

@@ -509,6 +509,9 @@ class CC_OT_cam_compo_single(bpy.types.Operator):
         draw_camera_info()
         bpy.app.timers.register(draw_snap_unsnap,first_interval=0.01)
         
+        #测试
+        bpy.ops.object.select_all(action='DESELECT')
+        bpy.context.view_layer.objects.active = None
 
         context.window_manager.modal_handler_add(self)
         return {'RUNNING_MODAL'}
