@@ -101,7 +101,7 @@ class CC_PT_cam_switch_sidebar(bpy.types.Panel):
                 index = scene.camera_items_index
                 cameraitem = scene.camera_items[index]
                 if cameraitem.camera_item is not None:
-                    col1.prop(cameraitem.camera_item, "name", text="",icon='GREASEPENCIL')
+                    col1.prop(cameraitem, "camera_name", text="",icon='GREASEPENCIL')
 
         row2.separator()
 
@@ -338,6 +338,7 @@ def update_camera_list():
         if obj.type == 'CAMERA':
             new_camera = scene.camera_items.add()
             new_camera.camera_item = obj
+            new_camera.camera_name = obj.name
 
 
 def click_camera_action(self, context):
