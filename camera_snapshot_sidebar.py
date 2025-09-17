@@ -1,4 +1,4 @@
-import bpy,os
+import bpy,os,webbrowser
 from datetime import datetime
 from . import snapshot_bar
 from . import snapshot_bar_invoke
@@ -56,6 +56,8 @@ class CC_PT_snapshot_sidebar(bpy.types.Panel):
         col2.separator()
         if not variables.camcompo_statu and len(context.selected_objects) > 0 and context.active_object.type == 'CAMERA':
             col2.operator("view3d.cam_compo_invoke", text="", icon="CON_CAMERASOLVER")
+        col2.separator()
+        col2.operator("cc.open_bilibili", text="", icon="URL", depress=True)
         
 class CC_UL_camera_items(bpy.types.UIList): 
     def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index): 
@@ -157,6 +159,20 @@ class CC_OT_update_camera(bpy.types.Operator):
 
     def execute(self, context):
         update_camera_list()
+        return {'FINISHED'}
+    
+class CC_OT_open_bilibili(bpy.types.Operator):
+    bl_idname = "cc.open_bilibili"
+    bl_label = "CamCompo视频教程"
+    bl_description = "我的B站还有其它Blender插件"
+    
+    url: bpy.props.StringProperty(
+        name="URL",
+        default="https://www.bilibili.com/video/BV15MtGzCEVr/",
+    )
+
+    def execute(self, context):
+        webbrowser.open(self.url)
         return {'FINISHED'}
 
 

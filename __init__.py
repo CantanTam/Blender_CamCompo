@@ -38,6 +38,7 @@ from .camera_snapshot_sidebar import (
     CC_OT_add_camera,
     CC_OT_delete_camera,
     CC_OT_update_camera,
+    CC_OT_open_bilibili,
     CC_OT_prev_snapshot,
     CC_OT_next_snapshot,
     CC_OT_restore_snapshot,
@@ -77,6 +78,7 @@ def register():
     bpy.utils.register_class(CC_OT_add_camera)
     bpy.utils.register_class(CC_OT_delete_camera)
     bpy.utils.register_class(CC_OT_update_camera)
+    bpy.utils.register_class(CC_OT_open_bilibili)
     bpy.utils.register_class(CC_OT_prev_snapshot)
     bpy.utils.register_class(CC_OT_next_snapshot)
     bpy.utils.register_class(CC_OT_restore_snapshot)
@@ -96,6 +98,7 @@ def unregister():
     bpy.utils.unregister_class(CC_OT_restore_snapshot)
     bpy.utils.unregister_class(CC_OT_next_snapshot)
     bpy.utils.unregister_class(CC_OT_prev_snapshot)
+    bpy.utils.unregister_class(CC_OT_open_bilibili)
     bpy.utils.unregister_class(CC_OT_update_camera)
     bpy.utils.unregister_class(CC_OT_delete_camera)
     bpy.utils.unregister_class(CC_OT_add_camera)
