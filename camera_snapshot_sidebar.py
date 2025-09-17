@@ -54,8 +54,9 @@ class CC_PT_snapshot_sidebar(bpy.types.Panel):
         col2.operator("view3d.prev_snapshot", text="", icon="TRIA_UP")
         col2.operator("view3d.next_snapshot", text="", icon="TRIA_DOWN")
         col2.separator()
-        col2.operator("view3d.cam_compo_invoke", text="", icon="CON_CAMERASOLVER")
-
+        if not variables.camcompo_statu and len(context.selected_objects) > 0 and context.active_object.type == 'CAMERA':
+            col2.operator("view3d.cam_compo_invoke", text="", icon="CON_CAMERASOLVER")
+        
 class CC_UL_camera_items(bpy.types.UIList): 
     def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index): 
         scene = context.scene
@@ -76,7 +77,7 @@ class CC_PT_cam_switch_sidebar(bpy.types.Panel):
 
     def draw(self, context):
         scene = context.scene
-        if context.mode != 'OBJECT':
+        if context.mode != 'OBJECT' or variables.camcompo_statu:
             return
         
         panel = self.layout
@@ -100,8 +101,8 @@ class CC_PT_cam_switch_sidebar(bpy.types.Panel):
             if scene.camera in {i.camera_item for i in scene.camera_items}:
                 index = scene.camera_items_index
                 cameraitem = scene.camera_items[index]
-                if cameraitem.camera_item is not None:
-                    col1.prop(cameraitem, "camera_name", text="",icon='GREASEPENCIL')
+                if cameraitem is not None:
+                    col1.prop(cameraitem.camera_item, "name", text="",icon='GREASEPENCIL')
 
         row2.separator()
 
@@ -343,6 +344,12 @@ def update_camera_list():
 
 def click_camera_action(self, context):
     if not variables.camcompo_statu:
+        camera_index = bpy.context.scene.camera_items_index
+        select_camera = bpy.context.scene.camera_items[camera_index].camera_item
+        bpy.ops.object.select_all(action='DESELECT')
+        select_camera.select_set(True)
+        bpy.context.view_layer.objects.active = select_camera
+
         variables.prev_click_time = variables.last_click_time
         now = datetime.now()
         variables.last_click_time = now.hour * 3600 + now.minute * 60 + now.second + now.microsecond / 1_000_000
