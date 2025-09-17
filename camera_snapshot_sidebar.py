@@ -236,6 +236,8 @@ class CC_OT_restore_snapshot(bpy.types.Operator):
                 )
             
         else:
+            variables.snapshot_on_going = True
+
             for i in range(24):
                 image = f'ICON_SNAP_{i+1}.png'
                 t = 0.08 + i * 0.08
@@ -243,6 +245,8 @@ class CC_OT_restore_snapshot(bpy.types.Operator):
                     lambda image=image: (snapshot_bar_invoke.draw_camera_snapshot_invoke(image), None)[-1],
                     first_interval=t
                 )
+
+            bpy.app.timers.register(draw_snap_unsnap, first_interval=0.08 * 25 )
 
             bpy.app.timers.register(
                 lambda:(
@@ -252,8 +256,8 @@ class CC_OT_restore_snapshot(bpy.types.Operator):
                     )[-1],
                 first_interval=0.08 * 26
                 )
-
-            bpy.app.timers.register(draw_snap_unsnap, first_interval=0.08 * 25 )
+            
+            bpy.app.timers.register(lambda: (setattr(variables, "snapshot_on_going", False), None)[-1], first_interval=0.08 * 25 )
         
         context.scene.camera.camera_snapshots_index = len(context.scene.camera.camera_snapshots) - 1
         return {'FINISHED'}
@@ -306,8 +310,8 @@ class CC_OT_goto_snapshot(bpy.types.Operator):
             variables.camera_distance = variables.camera_object.data.dof.focus_distance
             variables.camera_aperture = variables.camera_object.data.dof.aperture_fstop
             draw_camera_info()
-            #因为快照是已经被备份过的，所以肯定是处于备份状态的，所以不需要判定
-            bpy.app.timers.register(draw_snap_unsnap,first_interval=0.08*26)
+            if not variables.snapshot_on_going:
+                draw_snap_unsnap()
 
         return {'FINISHED'}
 

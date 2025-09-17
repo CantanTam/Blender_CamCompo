@@ -2,6 +2,7 @@ import bpy
 from mathutils import Vector
 
 camcompo_statu = False
+snapshot_on_going = False
 
 target_object_size = 0
 
