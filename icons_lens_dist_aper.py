@@ -11,7 +11,7 @@ class DrawLensDistAper:
     def __init__(self,):
         if variables.num_zero == 0 :
             self.image_path = 'ICON_LENS.png'
-        elif variables.num_zero == 1:
+        elif variables.num_zero == 2:
             self.image_path = 'ICON_DIST.png'
         else:
             self.image_path = 'ICON_APER.png'

@@ -152,6 +152,8 @@ class CC_OT_cam_compo_multi(bpy.types.Operator):
                 variables.camera_object.location += variables.camera_object.matrix_basis.to_quaternion() @ Vector((0, 0, -1 * variables.cam_target_distance_factor))
             elif event.value == 'RELEASE' and event.ctrl:
                 variables.camera_object.location += variables.camera_object.matrix_basis.to_quaternion() @ Vector((0, 0, -10 * variables.cam_target_distance_factor))
+            elif event.value == 'RELEASE' and event.alt:
+                variables.camera_object.location += variables.camera_object.matrix_basis.to_quaternion() @ Vector((0, 0, -0.1 * variables.cam_target_distance_factor))
             track_to_target()
             draw_snap_unsnap()    
             return {'RUNNING_MODAL'}
@@ -161,6 +163,8 @@ class CC_OT_cam_compo_multi(bpy.types.Operator):
                 variables.camera_object.location += variables.camera_object.matrix_basis.to_quaternion() @ Vector((0, 0, variables.cam_target_distance_factor))
             elif event.value == 'RELEASE' and event.ctrl:
                 variables.camera_object.location += variables.camera_object.matrix_basis.to_quaternion() @ Vector((0, 0, 10 * variables.cam_target_distance_factor))
+            elif event.value == 'RELEASE' and event.alt:
+                variables.camera_object.location += variables.camera_object.matrix_basis.to_quaternion() @ Vector((0, 0, 0.1 * variables.cam_target_distance_factor))
             track_to_target()
             draw_snap_unsnap() 
             return {'RUNNING_MODAL'}
@@ -259,11 +263,11 @@ class CC_OT_cam_compo_multi(bpy.types.Operator):
 
                     variables.camera_lens = variables.camera_object.data.lens
 
-                elif variables.num_zero == 1:
+                elif variables.num_zero == 2:
                     variables.camera_object.data.dof.focus_distance = variables.camera_distance + 1
                     variables.camera_distance = variables.camera_object.data.dof.focus_distance
 
-                elif variables.num_zero == 2:
+                elif variables.num_zero == 1:
                     variables.camera_object.data.dof.aperture_fstop = variables.camera_aperture + 1
                     variables.camera_aperture = variables.camera_object.data.dof.aperture_fstop
             
@@ -274,11 +278,11 @@ class CC_OT_cam_compo_multi(bpy.types.Operator):
 
                     variables.camera_lens = variables.camera_object.data.lens
 
-                elif variables.num_zero == 1:
+                elif variables.num_zero == 2:
                     variables.camera_object.data.dof.focus_distance = variables.camera_distance + 0.1
                     variables.camera_distance = variables.camera_object.data.dof.focus_distance
 
-                elif variables.num_zero == 2:
+                elif variables.num_zero == 1:
                     variables.camera_object.data.dof.aperture_fstop = variables.camera_aperture + 0.1
                     variables.camera_aperture = variables.camera_object.data.dof.aperture_fstop
 
@@ -302,11 +306,11 @@ class CC_OT_cam_compo_multi(bpy.types.Operator):
                     # 更新变量
                     variables.camera_lens = variables.camera_object.data.lens
 
-                elif variables.num_zero == 1:
+                elif variables.num_zero == 2:
                     variables.camera_object.data.dof.focus_distance = variables.camera_distance + 10
                     variables.camera_distance = variables.camera_object.data.dof.focus_distance
 
-                elif variables.num_zero == 2:
+                elif variables.num_zero == 1:
                     variables.camera_object.data.dof.aperture_fstop = variables.camera_aperture + 5
                     variables.camera_aperture = variables.camera_object.data.dof.aperture_fstop
 
@@ -326,11 +330,11 @@ class CC_OT_cam_compo_multi(bpy.types.Operator):
                     # lens <= 0 不做处理
                     variables.camera_lens = variables.camera_object.data.lens
 
-                elif variables.num_zero == 1:
+                elif variables.num_zero == 2:
                     variables.camera_object.data.dof.focus_distance = variables.camera_distance - 1
                     variables.camera_distance = variables.camera_object.data.dof.focus_distance
 
-                elif variables.num_zero == 2:
+                elif variables.num_zero == 1:
                     variables.camera_object.data.dof.aperture_fstop = variables.camera_aperture - 1
                     variables.camera_aperture = variables.camera_object.data.dof.aperture_fstop
 
@@ -340,11 +344,11 @@ class CC_OT_cam_compo_multi(bpy.types.Operator):
                         variables.camera_object.data.lens = variables.camera_lens - 1
                         variables.camera_lens = variables.camera_object.data.lens
 
-                elif variables.num_zero == 1:
+                elif variables.num_zero == 2:
                     variables.camera_object.data.dof.focus_distance = variables.camera_distance - 0.1
                     variables.camera_distance = variables.camera_object.data.dof.focus_distance
 
-                elif variables.num_zero == 2:
+                elif variables.num_zero == 1:
                     variables.camera_object.data.dof.aperture_fstop = variables.camera_aperture - 0.1
                     variables.camera_aperture = variables.camera_object.data.dof.aperture_fstop
 
@@ -372,11 +376,11 @@ class CC_OT_cam_compo_multi(bpy.types.Operator):
                     # 更新变量
                     variables.camera_lens = variables.camera_object.data.lens
 
-                elif variables.num_zero == 1:
+                elif variables.num_zero == 2:
                     variables.camera_object.data.dof.focus_distance = variables.camera_distance - 10
                     variables.camera_distance = variables.camera_object.data.dof.focus_distance
 
-                elif variables.num_zero == 2:
+                elif variables.num_zero == 1:
                     variables.camera_object.data.dof.aperture_fstop = variables.camera_aperture - 5
                     variables.camera_aperture = variables.camera_object.data.dof.aperture_fstop
             
@@ -638,11 +642,11 @@ class CC_OT_cam_compo_single(bpy.types.Operator):
 
                     variables.camera_lens = variables.camera_object.data.lens
 
-                elif variables.num_zero == 1:
+                elif variables.num_zero == 2:
                     variables.camera_object.data.dof.focus_distance = variables.camera_distance + 1
                     variables.camera_distance = variables.camera_object.data.dof.focus_distance
 
-                elif variables.num_zero == 2:
+                elif variables.num_zero == 1:
                     variables.camera_object.data.dof.aperture_fstop = variables.camera_aperture + 1
                     variables.camera_aperture = variables.camera_object.data.dof.aperture_fstop
             
@@ -653,11 +657,11 @@ class CC_OT_cam_compo_single(bpy.types.Operator):
 
                     variables.camera_lens = variables.camera_object.data.lens
 
-                elif variables.num_zero == 1:
+                elif variables.num_zero == 2:
                     variables.camera_object.data.dof.focus_distance = variables.camera_distance + 0.1
                     variables.camera_distance = variables.camera_object.data.dof.focus_distance
 
-                elif variables.num_zero == 2:
+                elif variables.num_zero == 1:
                     variables.camera_object.data.dof.aperture_fstop = variables.camera_aperture + 0.1
                     variables.camera_aperture = variables.camera_object.data.dof.aperture_fstop
 
@@ -681,11 +685,11 @@ class CC_OT_cam_compo_single(bpy.types.Operator):
                     # 更新变量
                     variables.camera_lens = variables.camera_object.data.lens
 
-                elif variables.num_zero == 1:
+                elif variables.num_zero == 2:
                     variables.camera_object.data.dof.focus_distance = variables.camera_distance + 10
                     variables.camera_distance = variables.camera_object.data.dof.focus_distance
 
-                elif variables.num_zero == 2:
+                elif variables.num_zero == 1:
                     variables.camera_object.data.dof.aperture_fstop = variables.camera_aperture + 5
                     variables.camera_aperture = variables.camera_object.data.dof.aperture_fstop
 
@@ -705,11 +709,11 @@ class CC_OT_cam_compo_single(bpy.types.Operator):
                     # lens <= 0 不做处理
                     variables.camera_lens = variables.camera_object.data.lens
 
-                elif variables.num_zero == 1:
+                elif variables.num_zero == 2:
                     variables.camera_object.data.dof.focus_distance = variables.camera_distance - 1
                     variables.camera_distance = variables.camera_object.data.dof.focus_distance
 
-                elif variables.num_zero == 2:
+                elif variables.num_zero == 1:
                     variables.camera_object.data.dof.aperture_fstop = variables.camera_aperture - 1
                     variables.camera_aperture = variables.camera_object.data.dof.aperture_fstop
 
@@ -719,11 +723,11 @@ class CC_OT_cam_compo_single(bpy.types.Operator):
                         variables.camera_object.data.lens = variables.camera_lens - 1
                         variables.camera_lens = variables.camera_object.data.lens
 
-                elif variables.num_zero == 1:
+                elif variables.num_zero == 2:
                     variables.camera_object.data.dof.focus_distance = variables.camera_distance - 0.1
                     variables.camera_distance = variables.camera_object.data.dof.focus_distance
 
-                elif variables.num_zero == 2:
+                elif variables.num_zero == 1:
                     variables.camera_object.data.dof.aperture_fstop = variables.camera_aperture - 0.1
                     variables.camera_aperture = variables.camera_object.data.dof.aperture_fstop
 
@@ -751,11 +755,11 @@ class CC_OT_cam_compo_single(bpy.types.Operator):
                     # 更新变量
                     variables.camera_lens = variables.camera_object.data.lens
 
-                elif variables.num_zero == 1:
+                elif variables.num_zero == 2:
                     variables.camera_object.data.dof.focus_distance = variables.camera_distance - 10
                     variables.camera_distance = variables.camera_object.data.dof.focus_distance
 
-                elif variables.num_zero == 2:
+                elif variables.num_zero == 1:
                     variables.camera_object.data.dof.aperture_fstop = variables.camera_aperture - 5
                     variables.camera_aperture = variables.camera_object.data.dof.aperture_fstop
             
