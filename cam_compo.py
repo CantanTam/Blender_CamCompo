@@ -238,6 +238,8 @@ class CC_OT_cam_compo_multi(bpy.types.Operator):
                 variables.camera_object.location += (variables.camera_object.matrix_basis.to_quaternion() @ Vector((-variables.cam_target_distance_factor, 0, 0)))
             elif event.value == 'RELEASE' and event.ctrl:
                 variables.camera_object.location += (variables.camera_object.matrix_basis.to_quaternion() @ Vector((-5 * variables.cam_target_distance_factor, 0, 0)))
+            elif event.value == 'RELEASE' and event.alt:
+                  variables.camera_object.location += (variables.camera_object.matrix_basis.to_quaternion() @ Vector((-0.1 * variables.cam_target_distance_factor, 0, 0)))
             draw_snap_unsnap() 
             return {'RUNNING_MODAL'}
         
@@ -246,6 +248,8 @@ class CC_OT_cam_compo_multi(bpy.types.Operator):
                 variables.camera_object.location += (variables.camera_object.matrix_basis.to_quaternion() @ Vector((variables.cam_target_distance_factor, 0, 0)))
             elif event.value == 'RELEASE' and event.ctrl:
                 variables.camera_object.location += (variables.camera_object.matrix_basis.to_quaternion() @ Vector((5 * variables.cam_target_distance_factor, 0, 0)))
+            elif event.value == 'RELEASE' and event.alt:
+                variables.camera_object.location += (variables.camera_object.matrix_basis.to_quaternion() @ Vector((0.1 * variables.cam_target_distance_factor, 0, 0)))
             draw_snap_unsnap() 
             return {'RUNNING_MODAL'}
         
@@ -538,6 +542,8 @@ class CC_OT_cam_compo_single(bpy.types.Operator):
                 variables.camera_object.location += variables.camera_object.matrix_basis.to_quaternion() @ Vector((0, 0, -0.1))
             elif event.value == 'RELEASE' and event.ctrl:
                 variables.camera_object.location += variables.camera_object.matrix_basis.to_quaternion() @ Vector((0, 0, -1))
+            elif event.value == 'RELEASE' and event.alt:
+                variables.camera_object.location += variables.camera_object.matrix_basis.to_quaternion() @ Vector((0, 0, -0.01))
             draw_snap_unsnap()
             return {'RUNNING_MODAL'}
         
@@ -547,6 +553,8 @@ class CC_OT_cam_compo_single(bpy.types.Operator):
                 variables.camera_object.location += variables.camera_object.matrix_basis.to_quaternion() @ Vector((0, 0, 0.1))
             elif event.value == 'RELEASE' and event.ctrl:
                 variables.camera_object.location += variables.camera_object.matrix_basis.to_quaternion() @ Vector((0, 0, 1))
+            elif event.value == 'RELEASE' and event.alt:
+                variables.camera_object.location += variables.camera_object.matrix_basis.to_quaternion() @ Vector((0, 0, 0.01))
             draw_snap_unsnap()
             return {'RUNNING_MODAL'}
         
@@ -617,6 +625,8 @@ class CC_OT_cam_compo_single(bpy.types.Operator):
                 variables.camera_object.location += (variables.camera_object.matrix_basis.to_quaternion() @ Vector((-0.1, 0, 0)))
             elif event.value == 'RELEASE' and event.ctrl:
                 variables.camera_object.location += (variables.camera_object.matrix_basis.to_quaternion() @ Vector((-0.5, 0, 0)))
+            elif event.value == 'RELEASE' and event.alt:
+                variables.camera_object.location += (variables.camera_object.matrix_basis.to_quaternion() @ Vector((-0.01, 0, 0)))
             draw_snap_unsnap()
             return {'RUNNING_MODAL'}
         
@@ -625,6 +635,8 @@ class CC_OT_cam_compo_single(bpy.types.Operator):
                 variables.camera_object.location += (variables.camera_object.matrix_basis.to_quaternion() @ Vector((0.1, 0, 0)))
             elif event.value == 'RELEASE' and event.ctrl:
                 variables.camera_object.location += (variables.camera_object.matrix_basis.to_quaternion() @ Vector((0.5, 0, 0)))
+            elif event.value == 'RELEASE' and event.alt:
+                variables.camera_object.location += (variables.camera_object.matrix_basis.to_quaternion() @ Vector((0.01, 0, 0)))
             draw_snap_unsnap()
             return {'RUNNING_MODAL'}
         
